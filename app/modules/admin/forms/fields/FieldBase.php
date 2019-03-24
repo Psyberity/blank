@@ -6,7 +6,7 @@ use Phalcon\Di;
 use Phalcon\Validation\Validator\Email;
 use Phalcon\Validation\Validator\PresenceOf;
 
-class FieldBase implements FieldInterface
+abstract class FieldBase
 {
     protected $name;
     protected $label;
@@ -37,34 +37,13 @@ class FieldBase implements FieldInterface
         $this->validators = $validators;
     }
 
-    public function render($render_action, Base $item = null, $params = [])
-    {
-        switch ($render_action) {
-            case 'view':
-                return $this->renderView($item, $params);
-            case 'edit':
-                return $this->renderEdit($item, $params);
-            case 'create':
-                return $this->renderCreate($params);
-            default:
-                return '';
-        }
-    }
+    abstract public function renderView(Base $item = null, $params = []);
 
-    public function renderView(Base $item = null, $params = [])
-    {
-        return null;
-    }
+    abstract public function renderEdit(Base $item = null, $params = []);
 
-    public function renderEdit(Base $item = null, $params = [])
-    {
-        return null;
-    }
+    abstract public function renderCreate($params = []);
 
-    public function renderCreate($params = [])
-    {
-        return null;
-    }
+    abstract protected function compile(Base $item = null, $params = []);
 
     protected function getItemVal(Base $item = null)
     {
@@ -100,15 +79,24 @@ class FieldBase implements FieldInterface
         return $this;
     }
 
-    protected function compile(Base $item = null, $params = [])
-    {
-        return $this;
-    }
-
     public function getCompiledFields()
     {
         $this->compile()->appendValidators();
         if (empty($this->field)) return [];
         return [$this->field];
+    }
+
+    public function render($render_action, Base $item = null, $params = [])
+    {
+        switch ($render_action) {
+            case 'view':
+                return $this->renderView($item, $params);
+            case 'edit':
+                return $this->renderEdit($item, $params);
+            case 'create':
+                return $this->renderCreate($params);
+            default:
+                return '';
+        }
     }
 }
