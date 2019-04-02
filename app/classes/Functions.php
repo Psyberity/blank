@@ -3,20 +3,20 @@ namespace App\Classes;
 
 class Functions
 {
-    public function countSpell($count, $count_1_form, $count_2_to_4form, $count_others)
+    public function countSpell(int $count, string $count1, string $count24, string $count5):string
     {
         $num = substr((string)$count, strlen((string)$count) - 1);
         $num = (int)$num;
         if ($num === 1) {
-            return $count_1_form;
+            return $count1;
         }
         if ($num > 1 && $num < 5) {
-            return $count_2_to_4form;
+            return $count24;
         }
-        return $count_others;
+        return $count5;
     }
 
-	public function rus2translit($string)
+	public function rus2Translit(string $string):string
     {
         $converter = [
             'а' => 'a',   'б' => 'b',   'в' => 'v',
@@ -48,10 +48,10 @@ class Functions
         return strtr($string, $converter);
 	}
 
-	public function str2url($str)
+	public function str2Url(string $str):string
     {
 		// переводим в транслит
-		$str = $this->rus2translit($str);
+		$str = $this->rus2Translit($str);
 		// в нижний регистр
 		$str = strtolower($str);
 		// заменям все ненужное нам на "-"
@@ -64,7 +64,7 @@ class Functions
 		return $str;
 	}
 
-	public function guidv4()
+	public function guidV4():string
     {
 		if (function_exists('com_create_guid') === true) {
             return trim(com_create_guid(), '{}');
@@ -76,7 +76,7 @@ class Functions
 		return strtoupper(vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4)));
 	}
 
-	public function randomAlias()
+	public function randomAlias():string
     {
 		$randomAlias = range('a', 'z');
 		shuffle($randomAlias);

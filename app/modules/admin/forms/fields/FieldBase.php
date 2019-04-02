@@ -30,20 +30,20 @@ abstract class FieldBase
     const VALID_PRESENCE        = 1;
     const VALID_EMAIL           = 2;
 
-    public function __construct($name, $label = '', $validators = [])
+    public function __construct(string $name, string $label = '', array $validators = [])
     {
         $this->name = $name;
         $this->label = $label;
         $this->validators = $validators;
     }
 
-    abstract public function renderView(Base $item = null, $params = []);
+    abstract public function renderView(Base $item = null, array $params = []):string ;
 
-    abstract public function renderEdit(Base $item = null, $params = []);
+    abstract public function renderEdit(Base $item = null, array $params = []):string ;
 
-    abstract public function renderCreate($params = []);
+    abstract public function renderCreate(array $params = []):string;
 
-    abstract protected function compile(Base $item = null, $params = []);
+    abstract protected function compile(Base $item = null, array $params = []):self ;
 
     protected function getItemVal(Base $item = null)
     {
@@ -51,12 +51,12 @@ abstract class FieldBase
         return $item->getClearVal($this->name);
     }
 
-    protected function renderField($view_name, $vars = [])
+    protected function renderField(string $viewName, array $vars = []):string
     {
-        return Di::getDefault()->get('view')->getPartial('_fields/' . $view_name, $vars);
+        return Di::getDefault()->get('view')->getPartial('_fields/' . $viewName, $vars);
     }
 
-    protected function appendValidators()
+    protected function appendValidators():self
     {
         if (!empty($this->validators) && ! empty($this->field)) {
             foreach ($this->validators as $validator) {
@@ -79,14 +79,14 @@ abstract class FieldBase
         return $this;
     }
 
-    public function getCompiledFields()
+    public function getCompiledFields():array
     {
         $this->compile()->appendValidators();
         if (empty($this->field)) return [];
         return [$this->field];
     }
 
-    public function render($render_action, Base $item = null, $params = [])
+    public function render(string $render_action, Base $item = null, array $params = []):string
     {
         switch ($render_action) {
             case 'view':

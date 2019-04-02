@@ -18,7 +18,7 @@
                 {% if item is empty %}
                     &nbsp;
                 {% else %}
-                    {% set field_val = item.getVal(field.getName()) %}
+                    {% set field_val = item.getVal([field.getName()]) %}
                     {% if field_val is empty %}
                         <i>Отсутствует</i>
                     {% else %}

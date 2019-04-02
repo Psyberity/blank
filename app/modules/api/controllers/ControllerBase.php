@@ -1,6 +1,7 @@
 <?php
 namespace Modules\Api\Controllers;
 
+use App\Models\Base;
 use App\Models\Module;
 use App\Models\ModuleController;
 use App\Classes\Auth,
@@ -22,28 +23,29 @@ class ControllerBase extends PhalconController
     protected $labels;
     protected $form;
     protected $item;
-    protected $primary_key;
-    protected $datatables_columns;
-    protected $search_fields;
-    protected $assets_change;
+    protected $primaryKey;
+    protected $dataTablesColumns;
+    protected $searchFields;
 
     public function beforeExecuteRoute()
     {
         // TODO: подумать над этим
-        //$module_name = $this->dispatcher->getModuleName();
-        $module_name = $this->config->module_api;
-        $this->module = Module::findFirstByModuleName($module_name);
-        $controller_name = $this->dispatcher->getControllerName();
-        $this->controller = ModuleController::findFirst("module_id = " . $this->module->module_id . " AND controller_name = '" . $controller_name . "'");
-        $action_name = $this->dispatcher->getActionName();
-        $this->action = Action::findFirstByActionName($action_name);
+        //$moduleName = $this->dispatcher->getModuleName();
+        $moduleName = $this->config->module_api;
+        $this->module = Module::findFirstByModuleName($moduleName);
+        $controllerName = $this->dispatcher->getControllerName();
+        $this->controller = ModuleController::findFirst("module_id = " . $this->module->module_id . " AND controller_name = '" . $controllerName . "'");
+        $actionName = $this->dispatcher->getActionName();
+        $this->action = Action::findFirstByActionName($actionName);
         if (!$this->controller) {
-            $this->flashSession->error('Контроллер не найден: ' . $controller_name);
-            return $this->response->redirect('');
+            $this->flashSession->error('Контроллер не найден: ' . $controllerName);
+            $this->response->redirect('');
+            return false;
         }
         if (!$this->action) {
-            $this->flashSession->error('Экшен не найден: ' . $action_name);
-            return $this->response->redirect('');
+            $this->flashSession->error('Экшен не найден: ' . $actionName);
+            $this->response->redirect('');
+            return false;
         }
 
         $this->auth = new Auth($this->module, $this->security, $this->config->application->anonymous_role_id);
@@ -52,9 +54,10 @@ class ControllerBase extends PhalconController
         if (!empty($token)) $this->auth->tokenLogin($token);
         $this->acl = $this->auth->acl;
 
-        if (!$this->acl->isAllowed($this->auth->module_user->module_role_id, $this->controller->module_controller_id, $this->action->action_id)) {
+        if (!$this->acl->isAllowed($this->auth->moduleUser->module_role_id, $this->controller->module_controller_id, $this->action->action_id)) {
             $this->flashSession->error('У Вас нет прав на это действие');
-            return $this->response->redirect('');
+            $this->response->redirect('');
+            return false;
         }
 
         $this->functions = new Functions();
@@ -63,20 +66,20 @@ class ControllerBase extends PhalconController
     public function initialize()
     {
         if (!empty($this->model)) {
-            $model_class = $this->model;
-            $this->labels = $model_class::$labels;
-            $this->primary_key = $model_class::$primary_key;
-            $this->datatables_columns = $model_class::$datatables_columns;
-            $this->search_fields = $model_class::$search_fields;
+            $modelClass = $this->model;
+            $this->labels = $modelClass::$labels;
+            $this->primaryKey = $modelClass::$primaryKey;
+            $this->dataTablesColumns = $modelClass::$dataTablesColumns;
+            $this->searchFields = $modelClass::$searchFields;
         }
     }
 
-    public function indexAction()
+    public function indexAction():bool
     {
         return false;
     }
 
-    public function listAction()
+    public function listAction():bool
     {
         $this->view->setRenderLevel(View::LEVEL_NO_RENDER);
         $start = (int) $_POST['start'];
@@ -86,13 +89,13 @@ class ControllerBase extends PhalconController
         $sort = (string) strtoupper($_POST['order'][0]['dir']);
         $search = (string) $_POST['search']['value'];
 
-        if (isset($this->datatables_columns[($column - 1)])) {
-            $column_data = $this->datatables_columns[($column - 1)];
-            foreach ($column_data as $field => $value_chain) {
+        if (isset($this->dataTablesColumns[($column - 1)])) {
+            $columnData = $this->dataTablesColumns[($column - 1)];
+            foreach ($columnData as $field => $valueChain) {
                 $column = $field . ' ' . $sort;
             }
         } else {
-            $column = $this->primary_key . ' ASC';
+            $column = $this->primaryKey . ' ASC';
         }
 
         $params = [
@@ -108,55 +111,55 @@ class ControllerBase extends PhalconController
         if (empty($search))
             unset($params['conditions'], $params['bind']);
 
-        $model_class = $this->model;
-        $items = $model_class::find($params);
-        $count = $model_class::count();
+        $modelClass = $this->model;
+        $items = $modelClass::find($params);
+        $count = $modelClass::count();
 
-        $table_data = [];
+        $tableData = [];
 
         if (!empty($search)) {
             unset($params['order'], $params['limit'], $params['offset']);
-            $countFiltered = $model_class::find($params);
-            $table_data['recordsFiltered'] = $countFiltered->count();
+            $countFiltered = $modelClass::find($params);
+            $tableData['recordsFiltered'] = $countFiltered->count();
         } else {
-            $table_data['recordsFiltered'] = $count;
+            $tableData['recordsFiltered'] = $count;
         }
 
         if (count($items) == 0) {
-            $empty_array = [];
-            for ($i = 0; $i < count($this->datatables_columns) + 2; $i++) {
-                $empty_array[] = ($i == 1) ? 'Не найдено' : '';
+            $emptyArray = [];
+            for ($i = 0; $i < count($this->dataTablesColumns) + 2; $i++) {
+                $emptyArray[] = ($i == 1) ? 'Не найдено' : '';
             }
-            $table_data['data'][] = $empty_array;
+            $tableData['data'][] = $emptyArray;
             $count = 0;
         }
 
-        $table_data['draw'] = $draw;
-        $table_data['recordsTotal'] = $count;
+        $tableData['draw'] = $draw;
+        $tableData['recordsTotal'] = $count;
 
-        $primary_key = $this->primary_key;
+        $primaryKey = $this->primaryKey;
         foreach ($items as $item) {
-            $view = '<a href="/' . $this->controller->controller_name . '/view/' . $item->$primary_key . '"><i class="fa fa-eye text-navy"></i></a>';
-            $edit = '<a href="/' . $this->controller->controller_name . '/edit/' . $item->$primary_key . '"><i class="fa fa-pencil text-success"></i></a>';
-            $delete = '<a title="Удалить"><i class="fa fa-trash text-danger delete-button" link="/' . $this->controller->controller_name . '/delete/' . $item->$primary_key . '"></i></a>';
-            $select = '<input type="checkbox" class="check_group" check_group_id="list_check" value="'. $item->$primary_key .'"/>';
-            $line_array = [];
-            $line_array[] = $select;
-            foreach ($this->datatables_columns as $column_data) {
-                $line_array[] = $this->listColumnHandler($item, $column_data);
+            $view = '<a href="/' . $this->controller->controller_name . '/view/' . $item->$primaryKey . '"><i class="fa fa-eye text-navy"></i></a>';
+            $edit = '<a href="/' . $this->controller->controller_name . '/edit/' . $item->$primaryKey . '"><i class="fa fa-pencil text-success"></i></a>';
+            $delete = '<a title="Удалить"><i class="fa fa-trash text-danger delete-button" link="/' . $this->controller->controller_name . '/delete/' . $item->$primaryKey . '"></i></a>';
+            $select = '<input type="checkbox" class="check_group" check_group_id="list_check" value="'. $item->$primaryKey .'"/>';
+            $lineArray = [];
+            $lineArray[] = $select;
+            foreach ($this->dataTablesColumns as $columnData) {
+                $lineArray[] = $this->listColumnHandler($item, $columnData);
             }
-            $line_array[] = $view;
-            $line_array[] = $edit;
-            $line_array[] = $delete;
-            $table_data['data'][] = $line_array;
+            $lineArray[] = $view;
+            $lineArray[] = $edit;
+            $lineArray[] = $delete;
+            $tableData['data'][] = $lineArray;
         }
         // TODO: сделать нормальную отправку хедера
         header('Access-Control-Allow-Origin: *');
-        echo json_encode($table_data);
+        echo json_encode($tableData);
         return true;
     }
 
-    public function selectAction()
+    public function selectAction():bool
     {
         $this->view->setRenderLevel(View::LEVEL_NO_RENDER);
         $limit = 50;
@@ -165,31 +168,31 @@ class ControllerBase extends PhalconController
         $response = [];
         $response['total'] = 0;
         $response['items'] = [];
-        $model_class = $this->model;
+        $modelClass = $this->model;
         $conditions = [];
         if ($search && strlen($search) > 0) {
-            if (!empty($this->search_fields)) {
-                foreach ($this->search_fields as $search_field) {
-                    $conditions[] = $search_field . " LIKE '%" . $search . "%'";
+            if (!empty($this->searchFields)) {
+                foreach ($this->searchFields as $searchField) {
+                    $conditions[] = $searchField . " LIKE '%" . $search . "%'";
                 }
             }
         }
-        $items = $model_class::find([implode(' OR ', $conditions), 'limit' => $limit])->toArray();
+        $items = $modelClass::find([implode(' OR ', $conditions), 'limit' => $limit])->toArray();
         $response['total'] = count($items);
         if ($response['total'] > 0) {
             foreach ($items as $item) {
                 $selection = [];
-                if (!empty($this->search_fields)) {
-                    foreach ($this->search_fields as $search_field) {
-                        $selection[] = $item[$search_field];
+                if (!empty($this->searchFields)) {
+                    foreach ($this->searchFields as $searchField) {
+                        $selection[] = $item[$searchField];
                     }
                 }
                 if (empty($selection)) {
-                    $selection[] = $item[$this->primary_key];
+                    $selection[] = $item[$this->primaryKey];
                 }
                 $response['items'][] = [
                     'selection' => implode(' / ', $selection),
-                    'id' => $item[$this->primary_key]
+                    'id' => $item[$this->primaryKey]
                 ];
             }
         }
@@ -198,16 +201,16 @@ class ControllerBase extends PhalconController
         return true;
     }
 
-    protected function listColumnHandler($item, $column_data)
+    protected function listColumnHandler(Base $item, array $columnData)
     {
         $value = '';
-        foreach ($column_data as $field => $value_chain) {
+        foreach ($columnData as $field => $valueChain) {
             $value = $item;
             $n = 0;
-            foreach ($value_chain as $unit) {
+            foreach ($valueChain as $unit) {
                 $n++;
                 $value = $value->$unit;
-                if (empty($value) && $n < count($value_chain)) {
+                if (empty($value) && $n < count($valueChain)) {
                     $value = null;
                     break;
                 }
@@ -217,7 +220,7 @@ class ControllerBase extends PhalconController
         return $value;
     }
 
-    protected function listValueHandler($field, $value)
+    protected function listValueHandler(string $field, $value)
     {
         return $value;
     }

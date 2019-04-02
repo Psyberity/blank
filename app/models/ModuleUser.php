@@ -7,12 +7,12 @@ class ModuleUser extends Base
 	public $user_id;
 	public $module_role_id;
 
-    public static $primary_key = 'module_user_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'module_user_id';
+    public static $dataTablesColumns = [
         ['user_id' => ['user', 'name']],
         ['module_role_id' => ['role', 'name']]
     ];
-    public static $search_fields = [];
+    public static $searchFields = [];
     public static $labels = [
         'index' => 'Список учетных записей',
         'create' => 'Добавить учетную запись',
@@ -34,9 +34,9 @@ class ModuleUser extends Base
         ]);
     }
 
-    public static function selectOptions($field_name, $params = [])
+    public static function selectOptions(string $fieldName, array $params = []):array
     {
-        switch ($field_name) {
+        switch ($fieldName) {
             case 'module_role_id':
                 $options = ModuleRole::simpleRoleArray();
                 break;

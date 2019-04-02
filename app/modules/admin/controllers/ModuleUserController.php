@@ -8,7 +8,7 @@ class ModuleUserController extends ModelControllerBase
 {
     protected $model = ModuleUser::class;
 
-    protected $assets_change = [
+    protected $assetsChange = [
         'create' => [
             'js' => ['module_user_create' => true]
         ],
@@ -26,58 +26,59 @@ class ModuleUserController extends ModelControllerBase
             ->registerField(FieldBase::TYPE_SELECT, 'module_role_id', 'Роль', []);
     }
 
-    protected function setEditVars()
+    protected function setEditVars():void
     {
-        $user_id = [
+        $userId = [
             'id' => $this->item->user_id,
             'selection' => $this->item->user->name
         ];
 
         parent::setEditVars();
-        $this->view->setVar('user_id', json_encode($user_id));
+        $this->view->setVar('user_id', json_encode($userId));
     }
 
-    public function deleteAction($item_id)
+    public function deleteAction(int $itemId):bool
     {
-        $module_user = $this->auth->module_user;
-        if ($module_user->model_user_id == $item_id) {
+        $moduleUser = $this->auth->moduleUser;
+        if ($moduleUser->model_user_id == $itemId) {
             $this->flashSession->error($this->labels['delete_self']);
-            return $this->response->redirect('/' . $this->controller->controller_name);
+            $this->response->redirect('/' . $this->controller->controller_name);
+            return false;
         }
-        return parent::deleteAction($item_id);
+        return parent::deleteAction($itemId);
     }
 
-    public function indexAction()
+    public function indexAction():bool
     {
         return parent::indexAction();
     }
 
-    public function createAction()
+    public function createAction():bool
     {
-        parent::createAction();
+        return parent::createAction();
     }
 
-    public function editAction($item_id)
+    public function editAction(int $itemId):bool
     {
-        return parent::editAction($item_id);
+        return parent::editAction($itemId);
     }
 
-    protected function createPost()
+    protected function createPost():bool
     {
         return parent::createPost();
     }
 
-    protected function editPost()
+    protected function editPost():bool
     {
         return parent::editPost();
     }
 
-    protected function setCreateVars()
+    protected function setCreateVars():void
     {
         parent::setCreateVars();
     }
 
-    public function setCommonVars()
+    public function setCommonVars():void
     {
         parent::setCommonVars();
     }

@@ -19,23 +19,23 @@ class ProfileController extends ModelControllerBase // TODO: перенести 
             ->registerField(FieldBase::TYPE_IMAGE, 'avatar', 'Аватар');
     }
 
-    public function indexAction()
+    public function indexAction():bool
     {
         $this->labels['edit'] = 'Профиль';
         return parent::editAction($this->auth->user->user_id);
     }
 
-    protected function editPost()
+    protected function editPost():bool
     {
         return parent::editPost();
     }
 
-    protected function setEditVars()
+    protected function setEditVars():void
     {
         parent::setEditVars();
     }
 
-    protected function afterEdit()
+    protected function afterEdit():bool
     {
         if (!empty($_POST['password1']) && strlen($_POST['password1']) > 0) {
             $this->item->password = $this->security->hash($_POST['password1']);
@@ -46,7 +46,7 @@ class ProfileController extends ModelControllerBase // TODO: перенести 
         return parent::afterEdit();
     }
 
-    public function setCommonVars()
+    public function setCommonVars():void
     {
         parent::setCommonVars();
     }

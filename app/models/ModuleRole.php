@@ -8,12 +8,12 @@ class ModuleRole extends Base
 	public $name;
 	public $acl;
 
-    public static $primary_key = 'module_role_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'module_role_id';
+    public static $dataTablesColumns = [
         ['name' => ['name']],
         ['module_id' => ['module', 'name']]
     ];
-    public static $search_fields = ['name'];
+    public static $searchFields = ['name'];
     public static $labels = [
         'index' => 'Список ролей',
         'create' => 'Создать роль',
@@ -31,22 +31,22 @@ class ModuleRole extends Base
         ]);
     }
 
-    public static function simpleRoleArray($zero_value = false)
+    public static function simpleRoleArray(string $zeroValue = null):array
     {
-        $temp_lines = self::find(['order' => 'module_id']);
+        $tempLines = self::find(['order' => 'module_id']);
         $lines = [];
-        foreach ($temp_lines as $temp_line) {
-            $module_name = $temp_line->module->name;
-            $temp_line = $temp_line->toArray();
-            $temp_line['module'] = $module_name;
-            $lines[] = $temp_line;
+        foreach ($tempLines as $tempLine) {
+            $moduleName = $tempLine->module->name;
+            $tempLine = $tempLine->toArray();
+            $tempLine['module'] = $moduleName;
+            $lines[] = $tempLine;
         }
-        return self::simpleDataArray(['module', 'name'], $lines, $zero_value);
+        return self::simpleDataArray(['module', 'name'], $lines, $zeroValue);
     }
 
-    public static function selectOptions($field_name, $params = [])
+    public static function selectOptions(string $fieldName, array $params = []):array
     {
-        switch ($field_name) {
+        switch ($fieldName) {
             case 'module_id':
                 $options = Module::simpleDataArray();
                 break;

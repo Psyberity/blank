@@ -3,12 +3,12 @@ namespace Modules\Www\Controllers;
 
 class IndexController extends ControllerBase
 {
-    public function indexAction()
+    public function indexAction():bool
     {
         return parent::indexAction();
     }
 
-    public function setCommonVars()
+    public function setCommonVars():void
     {
         parent::setCommonVars();
     }

@@ -7,7 +7,7 @@ class MenuLineController extends ControllerBase
 {
     protected $model = MenuLine::class;
 
-    protected function listValueHandler($field, $value)
+    protected function listValueHandler(string $field, $value)
     {
         switch ($field) {
             case 'parent_id':
@@ -22,12 +22,12 @@ class MenuLineController extends ControllerBase
         return $value;
     }
 
-    public function listAction()
+    public function listAction():bool
     {
         return parent::listAction();
     }
 
-    public function selectAction()
+    public function selectAction():bool
     {
         return parent::selectAction();
     }

@@ -21,7 +21,7 @@ class UserController extends ModelControllerBase
             ->registerField(FieldBase::TYPE_CHECKBOX, 'active', 'Активность', []);
     }
 
-    protected function afterCreate()
+    protected function afterCreate():bool
     {
         $this->item->password = $this->security->hash($_POST['password1']);
         if (!$this->item->save()) {
@@ -30,7 +30,7 @@ class UserController extends ModelControllerBase
         return parent::afterCreate();
     }
 
-    protected function afterEdit()
+    protected function afterEdit():bool
     {
         if (!empty($_POST['password1']) && strlen($_POST['password1']) > 0) {
             $this->item->password = $this->security->hash($_POST['password1']);
@@ -41,7 +41,7 @@ class UserController extends ModelControllerBase
         return parent::afterEdit();
     }
 
-    protected function listValueHandler($field, $value)
+    protected function listValueHandler(string $field, $value)
     {
         switch ($field) {
             case 'active':
@@ -53,47 +53,47 @@ class UserController extends ModelControllerBase
         return $value;
     }
 
-    public function indexAction()
+    public function indexAction():bool
     {
         return parent::indexAction();
     }
 
-    public function createAction()
+    public function createAction():bool
     {
-        parent::createAction();
+        return parent::createAction();
     }
 
-    public function editAction($item_id)
+    public function editAction(int $itemId):bool
     {
-        return parent::editAction($item_id);
+        return parent::editAction($itemId);
     }
 
-    public function deleteAction($item_id)
+    public function deleteAction(int $itemId):bool
     {
-        return parent::deleteAction($item_id);
+        return parent::deleteAction($itemId);
     }
 
-    protected function createPost()
+    protected function createPost():bool
     {
         return parent::createPost();
     }
 
-    protected function editPost()
+    protected function editPost():bool
     {
         return parent::editPost();
     }
 
-    protected function setCreateVars()
+    protected function setCreateVars():void
     {
         parent::setCreateVars();
     }
 
-    protected function setEditVars()
+    protected function setEditVars():void
     {
         parent::setEditVars();
     }
 
-    public function setCommonVars()
+    public function setCommonVars():void
     {
         parent::setCommonVars();
     }

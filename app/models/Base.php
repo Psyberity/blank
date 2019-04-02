@@ -5,86 +5,89 @@ use Phalcon\Mvc\Model;
 
 class Base extends Model
 {
-	public static $primary_key;
-    public static $datatables_columns;
-    public static $search_fields;
-    public static $file_fields;
+	public static $primaryKey;
+    public static $dataTablesColumns;
+    public static $searchFields;
+    public static $fileFields;
     public static $labels;
 
-    public static function simpleDataArray($value_field = 'name', $lines = false, $zero_value = false)
+    public static function simpleDataArray(array $valueField = ['name'], array $lines = [], string $zeroValue = null):array
     {
         $arr = [];
-        if ($zero_value) $arr[0] = $zero_value;
-        if (!$lines) $lines = self::find(['order' => $value_field])->toArray();
-        $class_name = get_called_class();
+        if ($zeroValue) $arr[0] = $zeroValue;
+        if (empty($lines)) {
+            $params = (count($valueField) == 1) ? ['order' => $valueField[0]] : null;
+            $lines = self::find($params)->toArray();
+        }
+        $className = get_called_class();
         foreach ($lines as $line) {
-            if (is_array($value_field)) {
+            if (count($valueField) > 1) {
                 $val = [];
-                foreach ($value_field as $field_name) {
-                    $val[] = $line[$field_name];
+                foreach ($valueField as $fieldName) {
+                    $val[] = $line[$fieldName];
                 }
                 $val = trim(implode(' ', $val));
             } else {
-                $val = $line[$value_field];
+                $val = $line[$valueField[0]];
             }
-            $arr[$line[$class_name::$primary_key]] = $val;
+            $arr[$line[$className::$primaryKey]] = $val;
         }
         return $arr;
     }
 
-    public function checkDir($dir)
+    public function checkDir(string $dir):void
     {
         $path = $_SERVER['DOCUMENT_ROOT'] . $dir;
         if (!is_dir($path)) mkdir($path, 0755, true);
     }
 
-    public function checkUploadDir($module_upload_dir)
+    public function checkUploadDir(string $moduleUploadDir):string
     {
-        $model_upload_dir = $module_upload_dir . '/' . mb_strtolower($this->getClearClass());
-        $this->checkDir($model_upload_dir);
-        return $model_upload_dir;
+        $modelUploadDir = $moduleUploadDir . '/' . mb_strtolower($this->getClearClass());
+        $this->checkDir($modelUploadDir);
+        return $modelUploadDir;
     }
 
-    public function getClearClass()
+    public function getClearClass():string
     {
-        $class_name = get_class($this);
-        $path = explode('\\', $class_name);
+        $className = get_class($this);
+        $path = explode('\\', $className);
         return $path[(count($path) - 1)];
     }
 
-    public function getVal($field)
+    public function getVal(array $field)
     {
-        if (is_array($field)) return $this->getRelatedVal($field);
-        return $this->getClearVal($field);
+        if (count($field) > 1) return $this->getRelatedVal($field);
+        return $this->getClearVal($field[0]);
     }
 
-    public function getClearVal($field)
+    public function getClearVal(string $field)
     {
         return $this->$field;
     }
 
-    public function getRelatedVal($field_data)
+    public function getRelatedVal(array $fieldData)
     {
-        $cur_val = $this;
+        $curValue = $this;
         $n = 0;
-        foreach ($field_data as $field) {
+        foreach ($fieldData as $fieldElement) {
             $n++;
-            if ($n == count($field_data)) {
-                $fields = explode('|', $field);
-                $cur_vals = [];
+            if ($n == count($fieldData)) {
+                $fields = explode('|', $fieldElement);
+                $curValues = [];
                 foreach ($fields as $field) {
-                    $cur_vals[] = $cur_val->$field;
+                    $curValues[] = $curValue->$field;
                 }
-                $cur_val = implode(' | ', $cur_vals);
+                $curValue = implode(' | ', $curValues);
             } else {
-                $cur_val = $cur_val->$field;
+                $curValue = $curValue->$fieldElement;
             }
-            if (empty($cur_val)) return '';
+            if (empty($curValue)) return '';
         }
-        return $cur_val;
+        return $curValue;
     }
 
-    public static function selectOptions($field_name)
+    public static function selectOptions(string $fieldName, array $params = []):array
     {
         return [];
     }

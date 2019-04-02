@@ -14,11 +14,11 @@ $(obj).select2({
         callback(element.val());
     },
     ajax: {
-        type: "POST",
-        url: '/user/select',
+        type: 'POST',
+        url: '/ajax/api/',
         quietMillis: 100,
         data: function (term) {
-            return {search: term};
+            return {controller: apiController, action: apiAction, search: term};
         },
         results: function (data) {
             return {results: data.items, more: false};

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `action` (
   `name` varchar(64) NOT NULL,
   `action_name` varchar(32) NOT NULL,
   PRIMARY KEY (`action_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 AVG_ROW_LENGTH=780 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8 AVG_ROW_LENGTH=780 ROW_FORMAT=DYNAMIC;
 
 -- Дамп данных таблицы blank.action: ~11 rows (приблизительно)
 /*!40000 ALTER TABLE `action` DISABLE KEYS */;
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `menu_line` (
   `module_controller_id` int(11) NOT NULL,
   `action_id` int(11) NOT NULL,
   PRIMARY KEY (`menu_line_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8;
 
 -- Дамп данных таблицы blank.menu_line: ~26 rows (приблизительно)
 /*!40000 ALTER TABLE `menu_line` DISABLE KEYS */;
@@ -274,9 +274,9 @@ CREATE TABLE IF NOT EXISTS `page` (
   `content` text,
   PRIMARY KEY (`page_id`),
   UNIQUE KEY `Индекс 2` (`page_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Дамп данных таблицы blank.page: ~2 rows (приблизительно)
+-- Дамп данных таблицы blank.page: ~1 rows (приблизительно)
 /*!40000 ALTER TABLE `page` DISABLE KEYS */;
 INSERT INTO `page` (`page_id`, `page_name`, `name`, `content`) VALUES
 	(1, 'test', 'Тестовая страница', '<p>Контент <span style="font-weight: bold;">тестовой страницы</span>.</p>');
@@ -398,10 +398,10 @@ CREATE TABLE IF NOT EXISTS `user` (
 -- Дамп данных таблицы blank.user: ~4 rows (приблизительно)
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 INSERT INTO `user` (`user_id`, `name`, `email`, `phone`, `password`, `avatar`, `active`, `last_login`, `token`) VALUES
-	(1, 'Super Admin', 'admin', '', '$2y$08$SmxPU0xkZ29qek90TWQwSupndS0ixw8MD.4.DWJe9l8bazStZ2nGq', NULL, 1, '2019-03-23 17:05:33', '0cbbaf683aacf14491686ef3eb031283'),
+	(1, 'Super Admin', 'admin', '', '$2y$08$SmxPU0xkZ29qek90TWQwSupndS0ixw8MD.4.DWJe9l8bazStZ2nGq', NULL, 1, '2019-04-02 15:16:49', '5fd21111a642ac21304d6d2673e58102'),
 	(2, 'Anonymous', '', '', NULL, NULL, 1, '2018-08-22 13:49:09', '9e5889921276553f585f9f7c77000146'),
 	(3, 'Администратор', 'admin@admin.adm', '', '$2y$08$ZHBPc3BRZ0cyWCtOeHNUaOXrvRpW6eMS1pMGjg7Vzr8GqDjSO8FCW', NULL, 1, '2019-03-23 17:05:25', '84d2214335c29069df9d9183af8d57cb'),
-	(4, 'www anonymous', 'anonymous@maombi.net', '', '$2y$08$eWRkcnczbFVHSEIxWFV4V.d9BqJwgvNaeAQ9D/SnaECYb45AKopSi', NULL, 1, NULL, '826509d8756a0fa1c2218c300aa47265');
+	(4, 'www anonymous', 'anonymous@blank.loc', '', '$2y$08$eWRkcnczbFVHSEIxWFV4V.d9BqJwgvNaeAQ9D/SnaECYb45AKopSi', NULL, 1, NULL, '826509d8756a0fa1c2218c300aa47265');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

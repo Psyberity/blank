@@ -8,12 +8,12 @@ class Page extends Base
 	public $name;
 	public $content;
 
-    public static $primary_key = 'page_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'page_id';
+    public static $dataTablesColumns = [
         ['name' => ['name']],
         ['page_name' => ['page_name']]
     ];
-    public static $search_fields = ['name', 'page_name'];
+    public static $searchFields = ['name', 'page_name'];
     public static $labels = [
         'index' => 'Список страниц',
         'create' => 'Добавить страницу',

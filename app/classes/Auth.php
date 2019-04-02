@@ -1,41 +1,43 @@
 <?php
 namespace App\Classes;
 
+use App\Models\Module;
 use App\Models\ModuleUser;
 use Phalcon\Di;
+use Phalcon\Security;
 
 class Auth
 {
     private $security;
     private $module;
     private $user;
-    private $module_user;
+    private $moduleUser;
     private $acl;
 
-    public function __construct($module, $security, $anonymous_role_id)
+    public function __construct(Module $module, Security $security, int $anonymousRoleId)
     {
         $this->module = $module;
         $this->security = $security;
 
-        $is_auth = $this->isAuth();
+        $isAuth = $this->isAuth();
         $session = true;
-        if ($is_auth) {
-            $module_user = ModuleUser::findFirst($is_auth['module_user_id']);
+        if ($isAuth) {
+            $moduleUser = ModuleUser::findFirst($isAuth['module_user_id']);
         } else {
-            $module_user = ModuleUser::findFirstByModuleRoleId($anonymous_role_id);
+            $moduleUser = ModuleUser::findFirstByModuleRoleId($anonymousRoleId);
             $session = false;
         }
-        $this->authorize($module_user, $session);
+        $this->authorize($moduleUser, $session);
     }
 
-    public function __get($key)
+    public function __get(string $key)
     {
-        if ($key == 'module_user' || $key == 'user' || $key == 'acl') return $this->$key;
-        if ($key == 'token') return $this->module_user->user->token;
+        if ($key == 'moduleUser' || $key == 'user' || $key == 'acl') return $this->$key;
+        if ($key == 'token') return $this->moduleUser->user->token;
         return null;
     }
 
-    public function login($email, $password)
+    public function login(string $email, string $password):bool
     {
         $email = trim($email);
         $password = trim($password);
@@ -45,17 +47,17 @@ class Auth
             ->join('App\Models\ModuleRole', 'mr.module_id = ' . $this->module->module_id . ' AND mr.module_role_id = mu.module_role_id', 'mr')
             ->where('u.active = 1 AND u.email = :email:', ['email' => $email])
             ->limit(1);
-        $module_user = $builder->getQuery()->execute();
-        if (!$module_user || count($module_user) != 1) return false;
-        if ($this->security->checkHash($password, $module_user[0]->user->password)) {
-            $this->authorize($module_user[0]);
+        $moduleUser = $builder->getQuery()->execute();
+        if (!$moduleUser || count($moduleUser) != 1) return false;
+        if ($this->security->checkHash($password, $moduleUser[0]->user->password)) {
+            $this->authorize($moduleUser[0]);
             $this->user->updateLogin();
             return true;
         }
         return false;
     }
 
-    public function tokenLogin($token)
+    public function tokenLogin(string $token):bool
     {
         if (empty($token)) return false;
         $builder = Di::getDefault()->get('modelsManager')->createBuilder()
@@ -64,32 +66,32 @@ class Auth
             ->join('App\Models\ModuleRole', 'mr.module_id = ' . $this->module->module_id . ' AND mr.module_role_id = mu.module_role_id', 'mr')
             ->where('u.active = 1 AND u.token = :token:', ['token' => $token])
             ->limit(1);
-        $module_user = $builder->getQuery()->execute();
-        if (!$module_user || count($module_user) != 1) return false;
-        $this->authorize($module_user[0], false);
+        $moduleUser = $builder->getQuery()->execute();
+        if (!$moduleUser || count($moduleUser) != 1) return false;
+        $this->authorize($moduleUser[0], false);
         return true;
     }
 
-    private function isAuth()
+    private function isAuth():?array
     {
-        $auth_session = Di::getDefault()->getSession()->get($this->module->module_name);
-        return !empty($auth_session) ? $auth_session : null;
+        $authSession = Di::getDefault()->getSession()->get($this->module->module_name);
+        return !empty($authSession) ? $authSession : null;
     }
 
-    private function authorize($module_user, $session = true)
+    private function authorize(ModuleUser $moduleUser, bool $session = true):void
     {
-        $this->module_user = $module_user;
-        $this->user = $module_user->user;
-        $this->acl = unserialize($module_user->role->acl);
+        $this->moduleUser = $moduleUser;
+        $this->user = $moduleUser->user;
+        $this->acl = unserialize($moduleUser->role->acl);
         if ($session) $this->startSession();
     }
 
-    private function startSession()
+    private function startSession():void
     {
-        Di::getDefault()->getSession()->set($this->module->module_name, $this->module_user->toArray());
+        Di::getDefault()->getSession()->set($this->module->module_name, $this->moduleUser->toArray());
     }
 
-    public function closeSession()
+    public function closeSession():void
     {
         Di::getDefault()->getSession()->remove($this->module->module_name);
         Di::getDefault()->getSession()->destroy();

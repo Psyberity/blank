@@ -10,21 +10,21 @@ class AjaxController extends ControllerBase
 
     }
 
-    public function apiAction()
+    public function apiAction():bool
     {
         $this->view->setRenderLevel(View::LEVEL_NO_RENDER);
 
-        $post_data = $this->request->getPost();
-        $api_controller = $post_data['controller'];
-        $api_action = $post_data['action'];
-        unset($post_data['controller']);
-        unset($post_data['action']);
+        $postData = $this->request->getPost();
+        $apiController = $postData['controller'];
+        $apiAction = $postData['action'];
+        unset($postData['controller']);
+        unset($postData['action']);
 
         $this->dispatcher->forward([
             'module' => 'api',
             'namespace' => 'Modules\Api\Controllers',
-            'controller' => $api_controller,
-            'action' => $api_action,
+            'controller' => $apiController,
+            'action' => $apiAction,
             'params' => ['token' => $this->auth->user->token]
         ]);
         return true;

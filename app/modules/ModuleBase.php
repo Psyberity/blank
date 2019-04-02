@@ -4,12 +4,12 @@ namespace Modules;
 class ModuleBase
 {
     protected $namespaces;
-    protected $module_dir;
+    protected $moduleDir;
     protected $config;
 
     public function __construct()
     {
-        $this->config = include __DIR__ . '/' . $this->module_dir . '/config/config.php';
+        $this->config = include __DIR__ . '/' . $this->moduleDir . '/config/config.php';
         $this->setNamespaces($this->config);
     }
 

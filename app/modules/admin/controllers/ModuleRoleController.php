@@ -23,9 +23,9 @@ class ModuleRoleController extends ModelControllerBase
             ->registerField(FieldBase::TYPE_TEXT, 'name', 'Название');
     }
 
-    private function createAcl($module_role_id, $actions)
+    private function createAcl(int $moduleRoleId, array $actions):Memory
     {
-        $anonymous_access = [
+        $anonymousAccess = [
             'index' => ['index'],
             'auth' => ['index'],
             'error' => ['show404']
@@ -33,45 +33,47 @@ class ModuleRoleController extends ModelControllerBase
 
         $acl = new Memory();
         $acl->setDefaultAction(Acl::DENY);
-        $acl->addRole(new PhalconRole($module_role_id));
+        $acl->addRole(new PhalconRole($moduleRoleId));
         // TODO разобраться почему не работает setDefaultAction DENY
-        $acl->deny($module_role_id, '*', '*');
-        if ($module_role_id == 1 || $module_role_id == 5) {
-            $acl->allow($module_role_id, '*', '*');
-        } else if ($module_role_id == 2) {
-            foreach ($anonymous_access as $controller_name => $action_names) {
-                $current_controller = ModuleController::findFirst("module_id = " . $this->item->module_id . " AND controller_name = '" . $controller_name . "'");
-                foreach ($action_names as $action_name) {
-                    $acl->addResource(new Resource($current_controller->module_controller_id), [Action::getId($action_name)]);
-                    $acl->allow($module_role_id, $current_controller->module_controller_id, [Action::getId($action_name)]);
+        $acl->deny($moduleRoleId, '*', '*');
+        if ($moduleRoleId == 1 || $moduleRoleId == 5) {
+            $acl->allow($moduleRoleId, '*', '*');
+        } else if ($moduleRoleId == 2) {
+            foreach ($anonymousAccess as $controllerName => $actionNames) {
+                $currentController = ModuleController::findFirst("module_id = " . $this->item->module_id . " AND controller_name = '" . $controllerName . "'");
+                foreach ($actionNames as $actionName) {
+                    $acl->addResource(new Resource($currentController->module_controller_id), [Action::getId($actionName)]);
+                    $acl->allow($moduleRoleId, $currentController->module_controller_id, [Action::getId($actionName)]);
                 }
             }
         } else {
             $controllers = ModuleController::findByModuleId($this->item->module_id);
             foreach ($controllers as $controller) {
-                $action_ids = [];
-                foreach ($controller->actions as $action) $action_ids[] = $action->action_id;
-                $acl->addResource(new Resource($controller->module_controller_id), $action_ids);
+                $actionIds = [];
+                foreach ($controller->actions as $action) $actionIds[] = $action->action_id;
+                $acl->addResource(new Resource($controller->module_controller_id), $actionIds);
             }
-            foreach ($actions as $module_controller_id => $action_ids) {
-                $acl->allow($module_role_id, $module_controller_id, $action_ids);
+            foreach ($actions as $moduleControllerId => $actionIds) {
+                $acl->allow($moduleRoleId, $moduleControllerId, $actionIds);
             }
         }
         return $acl;
     }
 
-    protected function afterEdit()
+    protected function afterEdit():bool
     {
-        $controller_actions = $this->request->getPost('action_ids');
-        if (empty($controller_actions)) $controller_actions = [];
-        $acl = $this->createAcl($this->item->module_role_id, $controller_actions);
+        $controllerActions = $this->request->getPost('action_ids');
+        if (empty($controllerActions)) $controllerActions = [];
+        $acl = $this->createAcl($this->item->module_role_id, $controllerActions);
         $this->item->acl = serialize($acl);
         if (!$this->item->update()) {
             $this->flashErrors();
+            return false;
         }
+        return true;
     }
 
-    protected function setEditVars()
+    protected function setEditVars():void
     {
         parent::setEditVars();
         $acl = (empty($this->item->acl) ? null : unserialize($this->item->acl));
@@ -79,47 +81,48 @@ class ModuleRoleController extends ModelControllerBase
         $this->view->setVar('controllers', ModuleController::findByModuleId($this->item->module_id));
     }
 
-    public function deleteAction($item_id)
+    public function deleteAction(int $itemId):bool
     {
-        $module_user = $this->auth->module_user;
-        if ($module_user->module_role_id == $item_id) {
+        $moduleUser = $this->auth->moduleUser;
+        if ($moduleUser->module_role_id == $itemId) {
             $this->flashSession->error($this->labels['delete_self']);
-            return $this->response->redirect('/' . $this->controller->controller_name);
+            $this->response->redirect('/' . $this->controller->controller_name);
+            return false;
         }
-        return parent::deleteAction($item_id);
+        return parent::deleteAction($itemId);
     }
 
-    public function indexAction()
+    public function indexAction():bool
     {
         return parent::indexAction();
     }
 
-    public function createAction()
+    public function createAction():bool
     {
-        parent::createAction();
+        return parent::createAction();
     }
 
-    public function editAction($item_id)
+    public function editAction(int $itemId):bool
     {
-        return parent::editAction($item_id);
+        return parent::editAction($itemId);
     }
 
-    protected function createPost()
+    protected function createPost():bool
     {
         return parent::createPost();
     }
 
-    protected function editPost()
+    protected function editPost():bool
     {
         return parent::editPost();
     }
 
-    protected function setCreateVars()
+    protected function setCreateVars():void
     {
         parent::setCreateVars();
     }
 
-    public function setCommonVars()
+    public function setCommonVars():void
     {
         parent::setCommonVars();
     }

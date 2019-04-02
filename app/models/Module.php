@@ -9,12 +9,12 @@ class Module extends Base
 	public $name;
 	public $module_name;
 
-    public static $primary_key = 'module_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'module_id';
+    public static $dataTablesColumns = [
         ['name' => ['name']],
         ['module_name' => ['module_name']]
     ];
-    public static $search_fields = ['name', 'module_name'];
+    public static $searchFields = ['name', 'module_name'];
     public static $labels = [
         'index' => 'Список модулей',
         'create' => 'Добавить модуль',
@@ -33,15 +33,21 @@ class Module extends Base
         return true;
     }
 
-    public function getDirs($key = null)
+    public function getDirs():array
     {
         $dirs = [
             'module_upload' => '/modules/' . $this->module_name . '/upload'
         ];
-        return (empty($key) || empty($dirs[$key])) ? $dirs : $dirs[$key];
+        return $dirs;
     }
 
-    public function checkDirs()
+    public function getDir(string $key = null):?string
+    {
+        $dirs = $this->getDirs();
+        return (empty($dirs[$key])) ? null : $dirs[$key];
+    }
+
+    public function checkDirs():void
     {
         $dirs = $this->getDirs();
         foreach ($dirs as $dir) {

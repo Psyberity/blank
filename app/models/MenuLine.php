@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use App\Classes\Auth;
+
 class MenuLine extends Base
 {
 	public $menu_line_id;
@@ -9,15 +11,15 @@ class MenuLine extends Base
 	public $module_controller_id;
 	public $action_id;
 
-    public static $primary_key = 'menu_line_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'menu_line_id';
+    public static $dataTablesColumns = [
         ['parent_parent_id' => ['parent', 'parent', 'name']],
         ['parent_id' => ['parent', 'name']],
         ['name' => ['name']],
         ['module_controller_id' => ['controller', 'name']],
         ['action_id' => ['action', 'name']]
     ];
-    public static $search_fields = ['name'];
+    public static $searchFields = ['name'];
     public static $labels = [
         'index' => 'Список строк',
         'create' => 'Добавить строку',
@@ -46,67 +48,67 @@ class MenuLine extends Base
         ]);
     }
 
-    public static function getMenu($auth, $module_controller_id, $action_id)
+    public static function getMenu(Auth $auth, int $moduleControllerId, int $actionId):array
     {
         $menu = [];
-        $menu_lines = self::findByParentId(0);
-        foreach ($menu_lines as $menu_line) {
-            $line = ['label' => $menu_line->name];
-            $children = $menu_line->children;
-            $children_data = [];
+        $menuLines = self::findByParentId(0);
+        foreach ($menuLines as $menuLine) {
+            $line = ['label' => $menuLine->name];
+            $children = $menuLine->children;
+            $childrenData = [];
             $add = true;
-            $line_active = false;
+            $lineActive = false;
             if ($children->valid()) {
                 foreach ($children as $child) {
-                    $child_line = ['label' => $child->name];
-                    $sub_children = $child->children;
-                    $sub_children_data = [];
-                    $sub_add = true;
-                    $child_active = false;
-                    if ($sub_children->valid()) {
-                        foreach ($sub_children as $sub_child) {
-                            if (!empty($sub_child->module_controller_id) && !empty($sub_child->action_id) && $auth->acl->isAllowed($auth->module_user->module_role_id, $sub_child->controller->module_controller_id, $sub_child->action->action_id)) {
-                                $action_name = ($sub_child->action->action_name == 'index') ? '' : $sub_child->action->action_name;
-                                $sub_child_active = ($sub_child->controller->module_controller_id == $module_controller_id && $sub_child->action->action_id == $action_id) ? true : false;
-                                $sub_children_data[] = [
-                                    'label' => $sub_child->name,
-                                    'url' => '/' . $sub_child->controller->controller_name . '/' . $action_name,
-                                    'active' => $sub_child_active
+                    $childLine = ['label' => $child->name];
+                    $subChildren = $child->children;
+                    $subChildrenData = [];
+                    $subAdd = true;
+                    $childActive = false;
+                    if ($subChildren->valid()) {
+                        foreach ($subChildren as $subChild) {
+                            if (!empty($subChild->module_controller_id) && !empty($subChild->action_id) && $auth->acl->isAllowed($auth->moduleUser->module_role_id, $subChild->controller->module_controller_id, $subChild->action->action_id)) {
+                                $actionName = ($subChild->action->action_name == 'index') ? '' : $subChild->action->action_name;
+                                $subChildActive = ($subChild->controller->module_controller_id == $moduleControllerId && $subChild->action->action_id == $actionId) ? true : false;
+                                $subChildrenData[] = [
+                                    'label' => $subChild->name,
+                                    'url' => '/' . $subChild->controller->controller_name . '/' . $actionName,
+                                    'active' => $subChildActive
                                 ];
-                                if ($sub_child_active || $sub_child->controller->module_controller_id == $module_controller_id) $child_active = true;
+                                if ($subChildActive || $subChild->controller->module_controller_id == $moduleControllerId) $childActive = true;
                             }
                         }
-                        if (empty($sub_children_data)) {
-                            $sub_add = false;
+                        if (empty($subChildrenData)) {
+                            $subAdd = false;
                         } else {
-                            $child_line['children'] = $sub_children_data;
+                            $childLine['children'] = $subChildrenData;
                         }
-                        $child_line['active'] = $child_active;
+                        $childLine['active'] = $childActive;
                     } else {
-                        if (!empty($child->module_controller_id) && !empty($child->action_id) && $auth->acl->isAllowed($auth->module_user->module_role_id, $child->controller->module_controller_id, $child->action->action_id)) {
-                            $action_name = ($child->action->action_name == 'index') ? '' : $child->action->action_name;
-                            $child_active = ($child->controller->module_controller_id == $module_controller_id && $child->action->action_id == $action_id) ? true : false;
-                            $child_line['url'] = '/' . $child->controller->controller_name . '/' . $action_name;
-                            $child_line['active'] = $child_active;
+                        if (!empty($child->module_controller_id) && !empty($child->action_id) && $auth->acl->isAllowed($auth->moduleUser->module_role_id, $child->controller->module_controller_id, $child->action->action_id)) {
+                            $actionName = ($child->action->action_name == 'index') ? '' : $child->action->action_name;
+                            $childActive = ($child->controller->module_controller_id == $moduleControllerId && $child->action->action_id == $actionId) ? true : false;
+                            $childLine['url'] = '/' . $child->controller->controller_name . '/' . $actionName;
+                            $childLine['active'] = $childActive;
                         } else {
-                            $sub_add = false;
+                            $subAdd = false;
                         }
                     }
-                    if ($sub_add) $children_data[] = $child_line;
-                    if ($child_active || $child->module_controller_id == $module_controller_id) $line_active = true;
+                    if ($subAdd) $childrenData[] = $childLine;
+                    if ($childActive || $child->module_controller_id == $moduleControllerId) $lineActive = true;
                 }
-                if (empty($children_data)) {
+                if (empty($childrenData)) {
                     $add = false;
                 } else {
-                    $line['children'] = $children_data;
+                    $line['children'] = $childrenData;
                 }
-                $line['active'] = $line_active;
+                $line['active'] = $lineActive;
             } else {
-                if (!empty($menu_line->module_controller_id) && !empty($menu_line->action_id) && $auth->acl->isAllowed($auth->module_user->module_role_id, $menu_line->controller->module_controller_id, $menu_line->action->action_id)) {
-                    $action_name = ($menu_line->action->action_name == 'index') ? '' : $menu_line->action->action_name;
-                    $line_active = ($menu_line->controller->module_controller_id == $module_controller_id && $menu_line->action->action_id == $action_id) ? true : false;
-                    $line['url'] = '/' . $menu_line->controller->controller_name . '/' . $action_name;
-                    $line['active'] = $line_active;
+                if (!empty($menuLine->module_controller_id) && !empty($menuLine->action_id) && $auth->acl->isAllowed($auth->moduleUser->module_role_id, $menuLine->controller->module_controller_id, $menuLine->action->action_id)) {
+                    $actionName = ($menuLine->action->action_name == 'index') ? '' : $menuLine->action->action_name;
+                    $lineActive = ($menuLine->controller->module_controller_id == $moduleControllerId && $menuLine->action->action_id == $actionId) ? true : false;
+                    $line['url'] = '/' . $menuLine->controller->controller_name . '/' . $actionName;
+                    $line['active'] = $lineActive;
                 } else {
                     $add = false;
                 }
@@ -116,7 +118,7 @@ class MenuLine extends Base
         return $menu;
     }
 
-    public static function simpleParentArray($zero_value = false)
+    public static function simpleParentArray(string $zero_value = null):array
     {
         $temp_lines = self::find('module_controller_id = 0 AND action_id = 0');
         $lines = [];
@@ -129,7 +131,7 @@ class MenuLine extends Base
         return self::simpleDataArray(['parent', 'name'], $lines, $zero_value);
     }
 
-    public static function selectOptions($field_name, $params = [])
+    public static function selectOptions(string $field_name, array $params = []):array
     {
         switch ($field_name) {
             case 'parent_id':
@@ -139,7 +141,7 @@ class MenuLine extends Base
                 $options = ModuleController::simpleModuleArray($params['module_id'], 'Нет');
                 break;
             case 'action_id':
-                $options = Action::simpleDataArray(['name', 'action_name'], false, 'Нет');
+                $options = Action::simpleDataArray(['name', 'action_name'], [], 'Нет');
                 break;
             default:
                 $options = [];

@@ -6,7 +6,7 @@ use Phalcon\Forms\Element\TextArea;
 
 class TextareaField extends FieldBase
 {
-    public function renderView(Base $item = null, $params = [])
+    public function renderView(Base $item = null, array $params = []):string
     {
         $vars = [
             'field_name' => $this->name,
@@ -15,7 +15,7 @@ class TextareaField extends FieldBase
         return $this->renderField('default_view', $vars);
     }
 
-    public function renderEdit(Base $item = null, $params = [])
+    public function renderEdit(Base $item = null, array $params = []):string
     {
         $this->compile($item, $params);
 
@@ -25,12 +25,12 @@ class TextareaField extends FieldBase
         return $this->renderField('default_edit', $vars);
     }
 
-    public function renderCreate($params = [])
+    public function renderCreate(array $params = []):string
     {
         return $this->renderEdit(null, $params);
     }
 
-    protected function compile(Base $item = null, $params = [])
+    protected function compile(Base $item = null, array $params = []):parent
     {
         $attrs = [
             'placeholder' => $this->label

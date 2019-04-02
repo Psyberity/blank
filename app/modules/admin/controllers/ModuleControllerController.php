@@ -20,122 +20,124 @@ class ModuleControllerController extends ModelControllerBase
             ->registerField(FieldBase::TYPE_TEXT, 'controller_name', 'Имя контроллера');
     }
 
-    protected function setCreateVars()
+    protected function setCreateVars():void
     {
         parent::setCreateVars();
         $this->view->setVar('actions', Action::find(['order' => 'name']));
     }
 
-    protected function afterCreate()
+    protected function afterCreate():bool
     {
-        $new_action_ids = $this->request->getPost('action_ids');
-        if (!empty($new_action_ids)) {
-            foreach ($new_action_ids as $new_action_id) {
-                $module_controller_action = new ModuleControllerAction();
-                $module_controller_action->module_controller_id = $this->item->module_controller_id;
-                $module_controller_action->action_id = $new_action_id;
-                if (!$module_controller_action->save()) {
-                    $this->flashErrors($module_controller_action);
+        $newActionIds = $this->request->getPost('action_ids');
+        if (!empty($newActionIds)) {
+            foreach ($newActionIds as $newActionId) {
+                $ModuleControllerAction = new ModuleControllerAction();
+                $ModuleControllerAction->module_controller_id = $this->item->module_controller_id;
+                $ModuleControllerAction->action_id = $newActionId;
+                if (!$ModuleControllerAction->save()) {
+                    $this->flashErrors($ModuleControllerAction);
                 }
             }
         }
+        return true;
     }
 
-    protected function setEditVars()
+    protected function setEditVars():void
     {
         parent::setEditVars();
-        $module_controller_actions = $this->item->actions;
-        $controller_actions = [];
-        if (!empty($module_controller_actions)) {
-            foreach ($module_controller_actions as $action) {
-                $controller_actions[$action->action_id] = true;
+        $moduleControllerActions = $this->item->actions;
+        $controllerActions = [];
+        if (!empty($moduleControllerActions)) {
+            foreach ($moduleControllerActions as $action) {
+                $controllerActions[$action->action_id] = true;
             }
         }
-        $this->view->setVar('module_controller_actions', $controller_actions);
+        $this->view->setVar('module_controller_actions', $controllerActions);
         $this->view->setVar('actions', Action::find(['order' => 'name']));
     }
 
-    protected function afterEdit()
+    protected function afterEdit():bool
     {
-        $old_controller_actions_data = $this->item->controller_actions;
-        $old_controller_actions = [];
-        if (!empty($old_controller_actions_data)) {
-            foreach ($old_controller_actions_data as $old_controller_actions_line) {
-                $old_controller_actions[$old_controller_actions_line->action_id] = $old_controller_actions_line;
+        $oldControllerActionsData = $this->item->controller_actions;
+        $oldControllerActions = [];
+        if (!empty($oldControllerActionsData)) {
+            foreach ($oldControllerActionsData as $oldControllerActionsLine) {
+                $oldControllerActions[$oldControllerActionsLine->action_id] = $oldControllerActionsLine;
             }
         }
-        $new_action_ids = $this->request->getPost('action_ids');
-        if (empty($new_action_ids)) $new_action_ids = [];
-        $del_actions = [];
-        $create_ids = [];
-        if (empty($new_action_ids)) {
-            $del_actions = $old_controller_actions;
+        $newActionIds = $this->request->getPost('action_ids');
+        if (empty($newActionIds)) $newActionIds = [];
+        $delActions = [];
+        $createIds = [];
+        if (empty($newActionIds)) {
+            $delActions = $oldControllerActions;
         } else {
-            if (empty($old_controller_actions)) {
-                $create_ids = $new_action_ids;
+            if (empty($oldControllerActions)) {
+                $createIds = $newActionIds;
             } else {
-                foreach ($new_action_ids as $new_action_id) {
-                    if (!isset($old_controller_actions[$new_action_id])) {
-                        $create_ids[] = $new_action_id;
+                foreach ($newActionIds as $newActionId) {
+                    if (!isset($oldControllerActions[$newActionId])) {
+                        $createIds[] = $newActionId;
                     }
                 }
-                foreach ($old_controller_actions as $old_action_id => $old_controller_action) {
-                    if (!in_array($old_action_id, $new_action_ids)) {
-                        $del_actions[] = $old_controller_action;
+                foreach ($oldControllerActions as $oldActionId => $oldControllerAction) {
+                    if (!in_array($oldActionId, $newActionIds)) {
+                        $delActions[] = $oldControllerAction;
                     }
                 }
             }
         }
-        if (!empty($del_actions)) {
-            foreach ($del_actions as $del_action) {
-                if (!$del_action->delete()) {
-                    $this->flashErrors($del_action);
+        if (!empty($delActions)) {
+            foreach ($delActions as $delAction) {
+                if (!$delAction->delete()) {
+                    $this->flashErrors($delAction);
                 }
             }
         }
-        if (!empty($create_ids)) {
-            foreach ($create_ids as $create_id) {
-                $module_controller_action = new ModuleControllerAction();
-                $module_controller_action->module_controller_id = $this->item->module_controller_id;
-                $module_controller_action->action_id = $create_id;
-                if (!$module_controller_action->save()) {
-                    $this->flashErrors($module_controller_action);
+        if (!empty($createIds)) {
+            foreach ($createIds as $createId) {
+                $ModuleControllerAction = new ModuleControllerAction();
+                $ModuleControllerAction->module_controller_id = $this->item->module_controller_id;
+                $ModuleControllerAction->action_id = $createId;
+                if (!$ModuleControllerAction->save()) {
+                    $this->flashErrors($ModuleControllerAction);
                 }
             }
         }
+        return true;
     }
 
-    public function indexAction()
+    public function indexAction():bool
     {
         return parent::indexAction();
     }
 
-    public function createAction()
+    public function createAction():bool
     {
-        parent::createAction();
+        return parent::createAction();
     }
 
-    public function editAction($item_id)
+    public function editAction(int $itemId):bool
     {
-        return parent::editAction($item_id);
+        return parent::editAction($itemId);
     }
 
-    public function deleteAction($item_id)
+    public function deleteAction(int $itemId):bool
     {
-        return parent::deleteAction($item_id);
+        return parent::deleteAction($itemId);
     }
 
-    protected function createPost()
+    protected function createPost():bool
     {
         return parent::createPost();
     }
 
-    protected function editPost()
+    protected function editPost():bool
     {
         return parent::editPost();
     }
 
-    public function setCommonVars()
+    public function setCommonVars():void
     {
         parent::setCommonVars();
     }

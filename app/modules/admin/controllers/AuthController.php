@@ -5,25 +5,27 @@ use Phalcon\Mvc\View;
 
 class AuthController extends ControllerBase
 {
-    public function indexAction()
+    public function indexAction():bool
     {
 		$this->view->setRenderLevel(View::LEVEL_ACTION_VIEW);
         if ($this->request->isPost()) {
             $login = $this->auth->login($this->request->getPost('email'), $this->request->getPost('password'));
             if ($login) {
                 $this->flashSession->success($this->auth->user->name);
-                return $this->response->redirect('');
+                $this->response->redirect('');
             } else {
                 $this->flashSession->error('Неверный пароль либо логин');
-                return $this->response->redirect('/auth');
+                $this->response->redirect('/auth');
             }
         }
+        return true;
     }
 
-    public function logoutAction()
+    public function logoutAction():bool
     {
         $this->auth->closeSession();
-        return $this->response->redirect('');
+        $this->response->redirect('');
+        return true;
     }
 }
 

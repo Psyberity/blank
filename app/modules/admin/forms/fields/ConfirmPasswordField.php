@@ -10,12 +10,12 @@ class ConfirmPasswordField extends FieldBase
     private $field1;
     private $field2;
 
-    public function renderView(Base $item = null, $params = [])
+    public function renderView(Base $item = null, array $params = []):string
     {
         return '';
     }
 
-    public function renderEdit(Base $item = null, $params = [])
+    public function renderEdit(Base $item = null, array $params = []):string
     {
         $this->compile($item, $params);
 
@@ -26,18 +26,18 @@ class ConfirmPasswordField extends FieldBase
         return $this->renderField('edit_confirm_password', $vars);
     }
 
-    public function renderCreate($params = [])
+    public function renderCreate(array $params = []):string
     {
         return $this->renderEdit(null, $params);
     }
 
-    public function getCompiledFields()
+    public function getCompiledFields():array
     {
         $this->compile();
         return [$this->field1, $this->field2];
     }
 
-    protected function compile(Base $item = null, $params = [])
+    protected function compile(Base $item = null, array $params = []):parent
     {
         $label1 = 'Пароль';
         $this->field1 = (new Password('password1', [

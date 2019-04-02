@@ -13,15 +13,15 @@ class User extends Base
     public $last_login;
     public $token;
 
-    public static $primary_key = 'user_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'user_id';
+    public static $dataTablesColumns = [
         ['name' => ['name']],
         ['email' => ['email']],
         ['phone' => ['phone']],
         ['active' => ['active']]
     ];
-    public static $search_fields = ['name', 'email'];
-    public static $file_fields = ['avatar'];
+    public static $searchFields = ['name', 'email'];
+    public static $fileFields = ['avatar'];
     public static $labels = [
         'index' => 'Список пользователей',
         'create' => 'Добавить пользователя',
@@ -37,7 +37,7 @@ class User extends Base
         $this->genToken($now);
     }
 
-    public function updateLogin()
+    public function updateLogin():void
     {
         $now = date('Y-m-d H:i:s');
         $this->last_login = $now;
@@ -45,12 +45,12 @@ class User extends Base
         $this->update();
     }
 
-    private function genToken($timestamp)
+    private function genToken(string $timestamp):void
     {
         $this->token = md5($this->email . $this->password . $timestamp);
     }
 
-    public function getAvatar()
+    public function getAvatar():string
     {
         if (!empty($this->avatar)) return $this->avatar;
         return '/modules/admin/img/default_avatar.png';

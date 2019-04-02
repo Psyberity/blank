@@ -6,15 +6,15 @@ use Phalcon\Forms\Element\Select;
 
 class SelectField extends FieldBase
 {
-    private $options_class;
+    private $optionsClass;
 
-    public function __construct($name, $label = '', $validators = [], $options_class = null)
+    public function __construct(string $name, string $label = '', array $validators = [], string $optionsClass = null)
     {
         parent::__construct($name, $label, $validators);
-        $this->options_class = $options_class;
+        $this->optionsClass = $optionsClass;
     }
 
-    public function renderView(Base $item = null, $params = [])
+    public function renderView(Base $item = null, array $params = []):string
     {
         $vars = [
             'field_name' => $this->name,
@@ -23,7 +23,7 @@ class SelectField extends FieldBase
         return $this->renderField('default_view', $vars);
     }
 
-    public function renderEdit(Base $item = null, $params = [])
+    public function renderEdit(Base $item = null, array $params = []):string
     {
         $this->compile($item, $params);
 
@@ -33,15 +33,15 @@ class SelectField extends FieldBase
         return $this->renderField('default_edit', $vars);
     }
 
-    public function renderCreate($params = [])
+    public function renderCreate(array $params = []):string
     {
         return $this->renderEdit(null, $params);
     }
 
-    protected function compile(Base $item = null, $params = [])
+    protected function compile(Base $item = null, array $params = []):parent
     {
-        $class_name = $this->options_class;
-        $values = $class_name::selectOptions($this->name, $params);
+        $className = $this->optionsClass;
+        $values = $className::selectOptions($this->name, $params);
         $this->field = (new Select($this->name, $values, [
             'class' => 'form-control'
         ]))

@@ -12,13 +12,13 @@ use Phalcon\Session\Adapter\Files as SessionAdapter;
 class AdminModule extends ModuleBase
 {
     protected $namespaces;
-    protected $module_dir = 'admin';
+    protected $moduleDir = 'admin';
     protected $config;
 
     public function registerAutoloaders()
     {
-        $api_module_config = include __DIR__ . '/../api/config/config.php';
-        $this->setNamespaces($api_module_config);
+        $apiModuleConfig = include __DIR__ . '/../api/config/config.php';
+        $this->setNamespaces($apiModuleConfig);
 		$loader = new Loader();
         $loader->registerNamespaces($this->namespaces);
 
@@ -33,10 +33,10 @@ class AdminModule extends ModuleBase
     public function registerServices($di)
     {
         $config = include __DIR__ . '/../../config/config.php';
-        $config_module = include __DIR__ . '/config/config.php';
-        $config_assets = include __DIR__ . '/config/config_assets.php';
-        $config->merge($config_module);
-        $config->merge($config_assets);
+        $configModule = include __DIR__ . '/config/config.php';
+        $configAssets = include __DIR__ . '/config/config_assets.php';
+        $config->merge($configModule);
+        $config->merge($configAssets);
 
 		$di->setShared('config', function () use ($config) {
 			return $config;

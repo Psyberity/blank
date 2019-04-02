@@ -1,6 +1,7 @@
 <?php
 namespace Modules\Admin\Controllers;
 
+use App\Models\Base;
 use Modules\Admin\Forms\Fields\CheckboxField;
 use Modules\Admin\Forms\Fields\ConfirmPasswordField;
 use Modules\Admin\Forms\Fields\FieldBase;
@@ -27,30 +28,29 @@ class ModelControllerBase extends ControllerBase
     public $acl;
     public $auth;
     public $lang;
-    public $api_url;
 
     protected $model;
     protected $labels;
-    protected $file_fields;
+    protected $fileFields;
     protected $fields;
     protected $item;
-    protected $primary_key;
-    protected $assets_change;
+    protected $primaryKey;
 
     public function initialize()
     {
         if (empty($this->model)) {
             $this->flashSession->error('Класс модели не указан в контроллере: ' . self::class);
-            return $this->response->redirect('');
+            $this->response->redirect('');
+            return false;
         }
         parent::initialize();
-        $model_class = $this->model;
-        $this->labels = $model_class::$labels;
-        $this->primary_key = $model_class::$primary_key;
-        $this->file_fields = $model_class::$file_fields;
+        $modelClass = $this->model;
+        $this->labels = $modelClass::$labels;
+        $this->primaryKey = $modelClass::$primaryKey;
+        $this->fileFields = $modelClass::$fileFields;
     }
 
-    public function indexAction()
+    public function indexAction():bool
     {
         $this->setCommonVars();
 
@@ -59,7 +59,7 @@ class ModelControllerBase extends ControllerBase
         return true;
     }
 
-    protected function handlePost()
+    protected function handlePost():?array
     {
         $checkboxes = $this->request->getPost('checkboxes');
         if (!empty($checkboxes) && is_array($checkboxes)) {
@@ -71,19 +71,19 @@ class ModelControllerBase extends ControllerBase
         return $_POST;
     }
 
-    protected function afterCreate()
+    protected function afterCreate():bool
     {
         $this->uploadFiles();
         return true;
     }
 
-    protected function afterEdit()
+    protected function afterEdit():bool
     {
         $this->uploadFiles();
         return true;
     }
 
-    protected function uploadFiles()
+    protected function uploadFiles():void
     {
         $files = $this->request->getUploadedFiles(true);
         if (!empty($files)) {
@@ -91,28 +91,28 @@ class ModelControllerBase extends ControllerBase
                 $key = $file->getKey();
                 $extension = $file->getExtension();
                 if (empty($extension)) continue;
-                if (!in_array($key, $this->file_fields)) continue;
-                $upload_dir = $this->item->checkUploadDir($this->module->getDirs('module_upload'));
-                $pk = $this->primary_key;
-                $upload_file = $this->item->$pk . $key . '.' . $extension;
-                $upload_path = $_SERVER['DOCUMENT_ROOT'] . $upload_dir . '/' . $upload_file;
-                $file->moveTo($upload_path);
-                $this->item->$key = $upload_dir . '/' . $upload_file;
+                if (!in_array($key, $this->fileFields)) continue;
+                $uploadDir = $this->item->checkUploadDir($this->module->getDir('module_upload'));
+                $pk = $this->primaryKey;
+                $uploadFile = $this->item->$pk . $key . '.' . $extension;
+                $uploadPath = $_SERVER['DOCUMENT_ROOT'] . $uploadDir . '/' . $uploadFile;
+                $file->moveTo($uploadPath);
+                $this->item->$key = $uploadDir . '/' . $uploadFile;
                 $this->item->update();
             }
         }
     }
 
-    protected function createPost()
+    protected function createPost():bool
     {
         if ($this->request->isPost()) {
 
             $form = new Form();
             foreach ($this->fields as $field) {
-                $form_fields = $field->getCompiledFields();
-                if (!empty($form_fields)) {
-                    foreach ($form_fields as $form_field) {
-                        $form->add($form_field);
+                $formFields = $field->getCompiledFields();
+                if (!empty($formFields)) {
+                    foreach ($formFields as $formField) {
+                        $form->add($formField);
                     }
                 }
             }
@@ -123,7 +123,8 @@ class ModelControllerBase extends ControllerBase
                 if ($this->item->save()) {
                     $this->flashSession->success($this->labels['created']);
                     $this->afterCreate();
-                    return $this->response->redirect('/' . $this->controller->controller_name);
+                    $this->response->redirect('/' . $this->controller->controller_name);
+                    return true;
                 } else {
                     $this->flashErrors();
                 }
@@ -134,16 +135,16 @@ class ModelControllerBase extends ControllerBase
         return false;
     }
 
-    protected function editPost()
+    protected function editPost():bool
     {
         if ($this->request->isPost()) {
 
             $form = new Form();
             foreach ($this->fields as $field) {
-                $form_fields = $field->getCompiledFields();
-                if (!empty($form_fields)) {
-                    foreach ($form_fields as $form_field) {
-                        $form->add($form_field);
+                $formFields = $field->getCompiledFields();
+                if (!empty($formFields)) {
+                    foreach ($formFields as $formField) {
+                        $form->add($formField);
                     }
                 }
             }
@@ -153,7 +154,8 @@ class ModelControllerBase extends ControllerBase
                 if ($this->item->save()) {
                     $this->flashSession->success($this->labels['edited']);
                     $this->afterEdit();
-                    return $this->response->redirect('/' . $this->controller->controller_name);
+                    $this->response->redirect('/' . $this->controller->controller_name);
+                    return true;
                 } else {
                     $this->flashErrors();
                 }
@@ -164,7 +166,7 @@ class ModelControllerBase extends ControllerBase
         return false;
     }
 
-    protected function setCreateVars()
+    protected function setCreateVars():void
     {
         $this->view->setVar('h2', $this->labels['create']);
         $this->view->setVar('submit_label', 'Добавить');
@@ -173,10 +175,10 @@ class ModelControllerBase extends ControllerBase
         $this->view->setVar('tab', (isset($_GET['tab'])) ? $_GET['tab'] : 'tab-info');
     }
 
-    protected function setEditVars()
+    protected function setEditVars():void
     {
-        $primary_key = $this->primary_key;
-        $this->view->setVar('item_id', $this->item->$primary_key);
+        $primaryKey = $this->primaryKey;
+        $this->view->setVar('item_id', $this->item->$primaryKey);
         $this->view->setVar('item', $this->item);
         $this->view->setVar('h2', $this->labels['edit']);
         $this->view->setVar('submit_label', 'Сохранить');
@@ -185,10 +187,10 @@ class ModelControllerBase extends ControllerBase
         $this->view->setVar('tab', (isset($_GET['tab'])) ? $_GET['tab'] : 'tab-info');
     }
 
-    protected function setViewVars()
+    protected function setViewVars():void
     {
-        $primary_key = $this->primary_key;
-        $this->view->setVar('item_id', $this->item->$primary_key);
+        $primaryKey = $this->primaryKey;
+        $this->view->setVar('item_id', $this->item->$primaryKey);
         $this->view->setVar('item', $this->item);
         $this->view->setVar('h2', $this->labels['edit']);
         $this->view->setVar('render_action', 'view');
@@ -196,7 +198,7 @@ class ModelControllerBase extends ControllerBase
         $this->view->setVar('tab', (isset($_GET['tab'])) ? $_GET['tab'] : 'tab-info');
     }
 
-    public function createAction()
+    public function createAction():bool
     {
         $this->setCommonVars();
 
@@ -208,15 +210,16 @@ class ModelControllerBase extends ControllerBase
         return true;
     }
 
-    public function editAction($item_id)
+    public function editAction(int $itemId):bool
     {
         $this->setCommonVars();
 
-        $model_class = $this->model;
-        $this->item = $model_class::findFirst($item_id);
+        $modelClass = $this->model;
+        $this->item = $modelClass::findFirst($itemId);
         if (!$this->item) {
             $this->flashSession->error($this->labels['not_found']);
-            return $this->response->redirect('/' . $this->controller->controller_name);
+            $this->response->redirect('/' . $this->controller->controller_name);
+            return false;
         }
 
         $return = $this->editPost();
@@ -227,15 +230,16 @@ class ModelControllerBase extends ControllerBase
         return true;
     }
 
-    public function viewAction($item_id)
+    public function viewAction(int $itemId):bool
     {
         $this->setCommonVars();
 
-        $model_class = $this->model;
-        $this->item = $model_class::findFirst($item_id);
+        $modelClass = $this->model;
+        $this->item = $modelClass::findFirst($itemId);
         if (!$this->item) {
             $this->flashSession->error($this->labels['not_found']);
-            return $this->response->redirect('/' . $this->controller->controller_name);
+            $this->response->redirect('/' . $this->controller->controller_name);
+            return false;
         }
 
         $this->setViewVars();
@@ -243,10 +247,10 @@ class ModelControllerBase extends ControllerBase
         return true;
     }
 
-    public function deleteAction($item_id)
+    public function deleteAction(int $itemId):bool
     {
-        $model_class = $this->model;
-        $this->item = $model_class::findFirst($item_id);
+        $modelClass = $this->model;
+        $this->item = $modelClass::findFirst($itemId);
         if ($this->item) {
             if (!$this->item->delete()) {
                 $this->flashErrors();
@@ -257,10 +261,11 @@ class ModelControllerBase extends ControllerBase
         } else {
             $this->flashSession->error($this->labels['not_found']);
         }
-        return $this->response->redirect('/' . $this->controller->controller_name);
+        $this->response->redirect('/' . $this->controller->controller_name);
+        return true;
     }
 
-    protected function listColumnHandler($item, $column_data)
+    protected function listColumnHandler(Base $item, array $column_data)
     {
         $value = '';
         foreach ($column_data as $field => $value_chain) {
@@ -279,20 +284,20 @@ class ModelControllerBase extends ControllerBase
         return $value;
     }
 
-    protected function listValueHandler($field, $value)
+    protected function listValueHandler(string $field, $value)
     {
         return $value;
     }
 
-    protected function flashErrors($object = null)
+    protected function flashErrors(Base $object = null):void
     {
         if ($object === null) $object = $this->item;
         parent::flashErrors($object);
     }
 
-    public function registerField($field_type, $name, $label = '', $validators = [FieldBase::VALID_PRESENCE])
+    public function registerField(int $fieldType, string $name, string $label = '', array $validators = [FieldBase::VALID_PRESENCE]):ControllerBase
     {
-        switch ($field_type) {
+        switch ($fieldType) {
             case FieldBase::TYPE_TEXT:
                 $field = new TextField($name, $label, $validators);
                 break;

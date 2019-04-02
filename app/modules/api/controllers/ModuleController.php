@@ -7,12 +7,12 @@ class ModuleController extends ControllerBase
 {
     protected $model = Module::class;
 
-    public function listAction()
+    public function listAction():bool
     {
         return parent::listAction();
     }
 
-    public function selectAction()
+    public function selectAction():bool
     {
         return parent::selectAction();
     }

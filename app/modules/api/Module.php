@@ -12,7 +12,7 @@ use Phalcon\Session\Adapter\Files as SessionAdapter;
 class ApiModule extends ModuleBase
 {
     protected $namespaces;
-    protected $module_dir = 'api';
+    protected $moduleDir = 'api';
     protected $config;
 
 	public function registerAutoloaders()
@@ -31,10 +31,10 @@ class ApiModule extends ModuleBase
     public function registerServices($di)
     {
         $config = include __DIR__ . '/../../config/config.php';
-        $config_module = include __DIR__ . '/config/config.php';
-        $config_assets = include __DIR__ . '/config/config_assets.php';
-        $config->merge($config_module);
-        $config->merge($config_assets);
+        $configModule = include __DIR__ . '/config/config.php';
+        $configAssets = include __DIR__ . '/config/config_assets.php';
+        $config->merge($configModule);
+        $config->merge($configAssets);
 
 		$di->setShared('config', function () use ($config) {
 			return $config;

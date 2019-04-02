@@ -9,12 +9,12 @@ class Action extends Base
 	public $name;
 	public $action_name;
 
-    public static $primary_key = 'action_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'action_id';
+    public static $dataTablesColumns = [
         ['name' => ['name']],
         ['action_name' => ['action_name']]
     ];
-    public static $search_fields = ['name', 'action_name'];
+    public static $searchFields = ['name', 'action_name'];
     public static $labels = [
         'index' => 'Список экшенов',
         'create' => 'Добавить экшен',
@@ -24,18 +24,18 @@ class Action extends Base
         'not_found' => 'Экшен не найден'
     ];
 
-    public static function getId($action_name)
+    public static function getId(string $actionName):?int
     {
         $id = null;
-        $action = self::findFirstByActionName($action_name);
+        $action = self::findFirstByActionName($actionName);
         if ($action && count($action) == 1) $id = $action->action_id;
         return $id;
     }
 
-    public function beforeDelete()
+    public function beforeDelete():bool
     {
-        $controller_actions = ModuleControllerAction::findByActionId($this->action_id);
-        if ($controller_actions && count($controller_actions) > 0) {
+        $controllerActions = ModuleControllerAction::findByActionId($this->action_id);
+        if ($controllerActions && count($controllerActions) > 0) {
             $message = new Message('There are controllers using this action', 'action_id', 'CantDelete');
             $this->appendMessage($message);
             return false;

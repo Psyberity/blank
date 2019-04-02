@@ -6,12 +6,12 @@ use Phalcon\Forms\Element\Password;
 
 class PasswordField extends FieldBase
 {
-    public function renderView(Base $item = null, $params = [])
+    public function renderView(Base $item = null, array $params = []):string
     {
         return '';
     }
 
-    public function renderEdit(Base $item = null, $params = [])
+    public function renderEdit(Base $item = null, array $params = []):string
     {
         $this->compile($item, $params);
 
@@ -21,12 +21,12 @@ class PasswordField extends FieldBase
         return $this->renderField('default_edit', $vars);
     }
 
-    public function renderCreate($params = [])
+    public function renderCreate(array $params = []):string
     {
         return $this->renderEdit(null, $params);
     }
 
-    protected function compile(Base $item = null, $params = [])
+    protected function compile(Base $item = null, array $params = []):parent
     {
         $this->field = (new Password($this->name, [
             'placeholder' => $this->label,

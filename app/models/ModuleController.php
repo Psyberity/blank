@@ -8,13 +8,13 @@ class ModuleController extends Base
 	public $name;
 	public $controller_name;
 
-    public static $primary_key = 'module_controller_id';
-    public static $datatables_columns = [
+    public static $primaryKey = 'module_controller_id';
+    public static $dataTablesColumns = [
         ['name' => ['name']],
         ['controller_name' => ['controller_name']],
         ['module_id' => ['module', 'name']]
     ];
-    public static $search_fields = ['name', 'controller_name'];
+    public static $searchFields = ['name', 'controller_name'];
     public static $labels = [
         'index' => 'Список контроллеров',
         'create' => 'Добавить контроллер',
@@ -44,11 +44,11 @@ class ModuleController extends Base
     public function beforeDelete()
     {
         // TODO: проверять использование контроллера в ACL
-        $controller_actions = $this->controller_actions;
-        if (!empty($controller_actions)) {
-            foreach ($controller_actions as $controller_action) {
-                if (!$controller_action->delete()) {
-                    foreach ($controller_action->getMessages() as $message) {
+        $controllerActions = $this->controller_actions;
+        if (!empty($controllerActions)) {
+            foreach ($controllerActions as $controllerAction) {
+                if (!$controllerAction->delete()) {
+                    foreach ($controllerAction->getMessages() as $message) {
                         $this->appendMessage($message);
                         return false;
                     }
@@ -57,15 +57,15 @@ class ModuleController extends Base
         }
     }
 
-    public static function simpleModuleArray($module_id, $zero_value = false)
+    public static function simpleModuleArray(int $moduleId, string $zeroValue = null):array
     {
-        $lines = self::findByModuleId($module_id)->toArray();
-        return self::simpleDataArray('name', $lines, $zero_value);
+        $lines = self::findByModuleId($moduleId)->toArray();
+        return self::simpleDataArray(['name'], $lines, $zeroValue);
     }
 
-    public static function selectOptions($field_name, $params = [])
+    public static function selectOptions(string $fieldName, array $params = []):array
     {
-        switch ($field_name) {
+        switch ($fieldName) {
             case 'module_id':
                 $options = Module::simpleDataArray();
                 break;
