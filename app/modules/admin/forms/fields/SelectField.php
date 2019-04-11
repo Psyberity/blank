@@ -6,14 +6,6 @@ use Phalcon\Forms\Element\Select;
 
 class SelectField extends FieldBase
 {
-    private $optionsClass;
-
-    public function __construct(string $name, string $label = '', array $validators = [], string $optionsClass = null)
-    {
-        parent::__construct($name, $label, $validators);
-        $this->optionsClass = $optionsClass;
-    }
-
     public function renderView(Base $item = null, array $params = []):string
     {
         $vars = [
@@ -40,7 +32,7 @@ class SelectField extends FieldBase
 
     protected function compile(Base $item = null, array $params = []):parent
     {
-        $className = $this->optionsClass;
+        $className = $this->params[0];
         $values = $className::selectOptions($this->name, $params);
         $this->field = (new Select($this->name, $values, [
             'class' => 'form-control'

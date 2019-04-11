@@ -3,19 +3,21 @@ namespace Modules\Admin\Controllers;
 
 use App\Models\Page;
 use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\TextField;
+use Modules\Admin\Forms\Fields\WysiwygField;
 
 class PageController extends ModelControllerBase
 {
-    protected $model = Page::class;
-
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(Page::class, 'page_id')
+            ->registerField(new IdField('page_id', 'ID', []))
+            ->registerField(new TextField('page_name', 'Системное имя'))
+            ->registerField(new TextField('name', 'Заголовок'))
+            ->registerField(new WysiwygField('content', 'Контент', []));
 
-        $this->registerField(FieldBase::TYPE_ID, 'page_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_TEXT, 'page_name', 'Системное имя')
-            ->registerField(FieldBase::TYPE_TEXT, 'name', 'Заголовок')
-            ->registerField(FieldBase::TYPE_WYSIWYG, 'content', 'Контент', []);
+        parent::initialize();
     }
 
     public function indexAction():bool

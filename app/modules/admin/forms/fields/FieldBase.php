@@ -12,29 +12,27 @@ abstract class FieldBase
     protected $label;
     protected $validators;
     protected $field;
-
-    const TYPE_TEXT             = 1;
-    const TYPE_SELECT           = 2;
-    const TYPE_HIDDEN           = 3;
-    const TYPE_SELECT2          = 4;
-    const TYPE_PASSWORD         = 5;
-    const TYPE_CONFIRM_PASSWORD = 6;
-    const TYPE_NUMBER           = 7;
-    const TYPE_TEXTAREA         = 8;
-    const TYPE_WYSIWYG          = 9;
-    const TYPE_FILE             = 10;
-    const TYPE_IMAGE            = 11;
-    const TYPE_CHECKBOX         = 12;
-    const TYPE_ID               = 13;
+    protected $params;
 
     const VALID_PRESENCE        = 1;
     const VALID_EMAIL           = 2;
 
-    public function __construct(string $name, string $label = '', array $validators = [])
+    public function __construct(string $name, string $label = '', array $validators = [FieldBase::VALID_PRESENCE], array $params = [])
     {
         $this->name = $name;
         $this->label = $label;
         $this->validators = $validators;
+        $this->params = $params;
+    }
+
+    final public function getName():string
+    {
+        return $this->name;
+    }
+
+    final public function getLabel():string
+    {
+        return $this->label;
     }
 
     abstract public function renderView(Base $item = null, array $params = []):string ;

@@ -9,7 +9,6 @@ class Module extends Base
 	public $name;
 	public $module_name;
 
-    public static $primaryKey = 'module_id';
     public static $dataTablesColumns = [
         ['name' => ['name']],
         ['module_name' => ['module_name']]
@@ -19,18 +18,19 @@ class Module extends Base
         'index' => 'Список модулей',
         'create' => 'Добавить модуль',
         'created' => 'Модуль добавлен',
+        'deleted' => 'Модуль удален',
         'not_found' => 'Модуль не найден',
         'action_denied' => 'Действие запрещено'
     ];
 
-    public function beforeDelete()
+    public function beforeDelete():bool
     {
         if ($this->module_name == 'admin' || $this->module_name == 'api') {
             $message = new Message($this->module_name . ' module can not be deleted', 'module_name', 'CantDelete');
             $this->appendMessage($message);
             return false;
         }
-        return true;
+        return parent::beforeDelete();
     }
 
     public function getDirs():array

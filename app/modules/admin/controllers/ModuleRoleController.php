@@ -9,18 +9,20 @@ use App\Models\ModuleController,
     Phalcon\Acl\Resource;
 use App\Models\ModuleRole;
 use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\SelectField;
+use Modules\Admin\Forms\Fields\TextField;
 
 class ModuleRoleController extends ModelControllerBase
 {
-    protected $model = ModuleRole::class;
-
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(ModuleRole::class, 'module_role_id')
+            ->registerField(new IdField('module_role_id', 'ID', []))
+            ->registerField(new SelectField('module_id', 'Модуль', [], [$this->model]))
+            ->registerField(new TextField('name', 'Название'));
 
-        $this->registerField(FieldBase::TYPE_ID, 'module_role_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_SELECT, 'module_id', 'Модуль', [])
-            ->registerField(FieldBase::TYPE_TEXT, 'name', 'Название');
+        parent::initialize();
     }
 
     private function createAcl(int $moduleRoleId, array $actions):Memory

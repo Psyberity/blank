@@ -5,7 +5,12 @@ use App\Models\MenuLine;
 
 class MenuLineController extends ControllerBase
 {
-    protected $model = MenuLine::class;
+    public function initialize()
+    {
+        $this->registerModel(MenuLine::class, 'menu_line_id');
+
+        parent::initialize();
+    }
 
     protected function listValueHandler(string $field, $value)
     {

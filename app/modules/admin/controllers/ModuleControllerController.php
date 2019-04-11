@@ -5,19 +5,21 @@ use App\Models\Action;
 use App\Models\ModuleController;
 use App\Models\ModuleControllerAction;
 use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\SelectField;
+use Modules\Admin\Forms\Fields\TextField;
 
 class ModuleControllerController extends ModelControllerBase
 {
-    protected $model = ModuleController::class;
-
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(ModuleController::class, 'module_controller_id')
+            ->registerField(new IdField('module_controller_id', 'ID', []))
+            ->registerField(new SelectField('module_id', 'Модуль', [], [$this->model]))
+            ->registerField(new TextField('name', 'Название'))
+            ->registerField(new TextField('controller_name', 'Имя контроллера'));
 
-        $this->registerField(FieldBase::TYPE_ID, 'module_controller_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_SELECT, 'module_id', 'Модуль', [])
-            ->registerField(FieldBase::TYPE_TEXT, 'name', 'Название')
-            ->registerField(FieldBase::TYPE_TEXT, 'controller_name', 'Имя контроллера');
+        parent::initialize();
     }
 
     protected function setCreateVars():void

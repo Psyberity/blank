@@ -2,19 +2,19 @@
 namespace Modules\Admin\Controllers;
 
 use App\Models\Action;
-use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\TextField;
 
 class ActionController extends ModelControllerBase
 {
-    protected $model = Action::class;
-
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(Action::class, 'action_id')
+            ->registerField(new IdField('action_id', 'ID', []))
+            ->registerField(new TextField('name', 'Название'))
+            ->registerField(new TextField('action_name', 'Имя экшена'));
 
-        $this->registerField(FieldBase::TYPE_ID, 'action_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_TEXT, 'name', 'Название')
-            ->registerField(FieldBase::TYPE_TEXT, 'action_name', 'Имя экшена');
+        parent::initialize();
     }
 
     public function indexAction():bool

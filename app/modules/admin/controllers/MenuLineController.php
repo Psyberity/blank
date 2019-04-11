@@ -3,20 +3,22 @@ namespace Modules\Admin\Controllers;
 
 use App\Models\MenuLine;
 use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\SelectField;
+use Modules\Admin\Forms\Fields\TextField;
 
 class MenuLineController extends ModelControllerBase
 {
-    protected $model = MenuLine::class;
-
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(MenuLine::class, 'menu_line_id')
+            ->registerField(new IdField('menu_line_id', 'ID', []))
+            ->registerField(new TextField('name', 'Название'))
+            ->registerField(new SelectField('parent_id', 'Родитель', [], [$this->model]))
+            ->registerField(new SelectField('module_controller_id', 'Контроллер', [], [$this->model]))
+            ->registerField(new SelectField('action_id', 'Экшен', [], [$this->model]));
 
-        $this->registerField(FieldBase::TYPE_ID, 'menu_line_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_TEXT, 'name', 'Название')
-            ->registerField(FieldBase::TYPE_SELECT, 'parent_id', 'Родитель', [])
-            ->registerField(FieldBase::TYPE_SELECT, 'module_controller_id', 'Контроллер', [])
-            ->registerField(FieldBase::TYPE_SELECT, 'action_id', 'Экшен', []);
+        parent::initialize();
     }
 
     public function indexAction():bool

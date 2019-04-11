@@ -2,16 +2,14 @@
 namespace Modules\Api\Controllers;
 
 use App\Models\Base;
-use App\Models\Module;
-use App\Models\ModuleController;
-use App\Classes\Auth,
-    App\Classes\Functions,
-    App\Models\Action,
-    Phalcon\Mvc\Controller as PhalconController,
+use Phalcon\Mvc\Controller,
     Phalcon\Mvc\View;
+use App\Traits\ControllerTrait;
 
-class ControllerBase extends PhalconController
+class ControllerBase extends Controller
 {
+    use ControllerTrait;
+
     public $module;
     public $controller;
     public $action;
@@ -26,49 +24,13 @@ class ControllerBase extends PhalconController
     protected $primaryKey;
     protected $dataTablesColumns;
     protected $searchFields;
-
-    public function beforeExecuteRoute()
-    {
-        // TODO: подумать над этим
-        //$moduleName = $this->dispatcher->getModuleName();
-        $moduleName = $this->config->module_api;
-        $this->module = Module::findFirstByModuleName($moduleName);
-        $controllerName = $this->dispatcher->getControllerName();
-        $this->controller = ModuleController::findFirst("module_id = " . $this->module->module_id . " AND controller_name = '" . $controllerName . "'");
-        $actionName = $this->dispatcher->getActionName();
-        $this->action = Action::findFirstByActionName($actionName);
-        if (!$this->controller) {
-            $this->flashSession->error('Контроллер не найден: ' . $controllerName);
-            $this->response->redirect('');
-            return false;
-        }
-        if (!$this->action) {
-            $this->flashSession->error('Экшен не найден: ' . $actionName);
-            $this->response->redirect('');
-            return false;
-        }
-
-        $this->auth = new Auth($this->module, $this->security, $this->config->application->anonymous_role_id);
-        $token = $this->request->get('token');
-        if (empty($token)) $token = $this->dispatcher->getParam('token');
-        if (!empty($token)) $this->auth->tokenLogin($token);
-        $this->acl = $this->auth->acl;
-
-        if (!$this->acl->isAllowed($this->auth->moduleUser->module_role_id, $this->controller->module_controller_id, $this->action->action_id)) {
-            $this->flashSession->error('У Вас нет прав на это действие');
-            $this->response->redirect('');
-            return false;
-        }
-
-        $this->functions = new Functions();
-    }
+    protected $moduleName = 'api';
 
     public function initialize()
     {
         if (!empty($this->model)) {
             $modelClass = $this->model;
             $this->labels = $modelClass::$labels;
-            $this->primaryKey = $modelClass::$primaryKey;
             $this->dataTablesColumns = $modelClass::$dataTablesColumns;
             $this->searchFields = $modelClass::$searchFields;
         }
@@ -137,12 +99,11 @@ class ControllerBase extends PhalconController
         $tableData['draw'] = $draw;
         $tableData['recordsTotal'] = $count;
 
-        $primaryKey = $this->primaryKey;
         foreach ($items as $item) {
-            $view = '<a href="/' . $this->controller->controller_name . '/view/' . $item->$primaryKey . '"><i class="fa fa-eye text-navy"></i></a>';
-            $edit = '<a href="/' . $this->controller->controller_name . '/edit/' . $item->$primaryKey . '"><i class="fa fa-pencil text-success"></i></a>';
-            $delete = '<a title="Удалить"><i class="fa fa-trash text-danger delete-button" link="/' . $this->controller->controller_name . '/delete/' . $item->$primaryKey . '"></i></a>';
-            $select = '<input type="checkbox" class="check_group" check_group_id="list_check" value="'. $item->$primaryKey .'"/>';
+            $view = '<a href="/' . $this->controller->controller_name . '/view/' . $item->getVal([$this->primaryKey]) . '"><i class="fa fa-eye text-navy"></i></a>';
+            $edit = '<a href="/' . $this->controller->controller_name . '/edit/' . $item->getVal([$this->primaryKey]) . '"><i class="fa fa-pencil text-success"></i></a>';
+            $delete = '<a title="Удалить"><i class="fa fa-trash text-danger delete-button" link="/' . $this->controller->controller_name . '/delete/' . $item->getVal([$this->primaryKey]) . '"></i></a>';
+            $select = '<input type="checkbox" class="check_group" check_group_id="list_check" value="'. $item->getVal([$this->primaryKey]) .'"/>';
             $lineArray = [];
             $lineArray[] = $select;
             foreach ($this->dataTablesColumns as $columnData) {
@@ -223,6 +184,13 @@ class ControllerBase extends PhalconController
     protected function listValueHandler(string $field, $value)
     {
         return $value;
+    }
+
+    public function registerModel(string $modelClass, string $primaryKey):ControllerBase
+    {
+        $this->model = $modelClass;
+        $this->primaryKey = $primaryKey;
+        return $this;
     }
 
 }

@@ -5,7 +5,12 @@ use App\Models\Action;
 
 class ActionController extends ControllerBase
 {
-    protected $model = Action::class;
+    public function initialize()
+    {
+        $this->registerModel(Action::class, 'action_id');
+
+        parent::initialize();
+    }
 
     public function listAction():bool
     {

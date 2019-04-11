@@ -5,7 +5,12 @@ use App\Models\ModuleUser;
 
 class ModuleUserController extends ControllerBase
 {
-    protected $model = ModuleUser::class;
+    public function initialize()
+    {
+        $this->registerModel(ModuleUser::class, 'module_user_id');
+
+        parent::initialize();
+    }
 
     public function listAction():bool
     {

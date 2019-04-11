@@ -11,7 +11,6 @@ class MenuLine extends Base
 	public $module_controller_id;
 	public $action_id;
 
-    public static $primaryKey = 'menu_line_id';
     public static $dataTablesColumns = [
         ['parent_parent_id' => ['parent', 'parent', 'name']],
         ['parent_id' => ['parent', 'name']],
@@ -26,6 +25,7 @@ class MenuLine extends Base
         'edit' => 'Редактировать строку',
         'created' => 'Строка добавлена',
         'edited' => 'Строка изменена',
+        'deleted' => 'Строка удалена',
         'not_found' => 'Строка не найдена'
     ];
 
@@ -128,7 +128,7 @@ class MenuLine extends Base
             $temp_line['parent'] = $parent_name;
             $lines[] = $temp_line;
         }
-        return self::simpleDataArray(['parent', 'name'], $lines, $zero_value);
+        return self::simpleDataArray('menu_line_id', ['parent', 'name'], $lines, $zero_value);
     }
 
     public static function selectOptions(string $field_name, array $params = []):array
@@ -141,7 +141,7 @@ class MenuLine extends Base
                 $options = ModuleController::simpleModuleArray($params['module_id'], 'Нет');
                 break;
             case 'action_id':
-                $options = Action::simpleDataArray(['name', 'action_name'], [], 'Нет');
+                $options = Action::simpleDataArray('action_id', ['name', 'action_name'], [], 'Нет');
                 break;
             default:
                 $options = [];

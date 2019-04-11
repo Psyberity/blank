@@ -5,7 +5,12 @@ use App\Models\User;
 
 class UserController extends ControllerBase
 {
-    protected $model = User::class;
+    public function initialize()
+    {
+        $this->registerModel(User::class, 'user_id');
+
+        parent::initialize();
+    }
 
     protected function listValueHandler(string $field, $value)
     {

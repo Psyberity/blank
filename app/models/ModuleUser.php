@@ -7,7 +7,6 @@ class ModuleUser extends Base
 	public $user_id;
 	public $module_role_id;
 
-    public static $primaryKey = 'module_user_id';
     public static $dataTablesColumns = [
         ['user_id' => ['user', 'name']],
         ['module_role_id' => ['role', 'name']]
@@ -19,6 +18,7 @@ class ModuleUser extends Base
         'edit' => 'Редактировать учетную запись',
         'created' => 'Учетная запись добавлена',
         'edited' => 'Учетная запись изменена',
+        'deleted' => 'Учетная запись удалена',
         'not_found' => 'Учетная запись не найдена',
         'delete_self' => 'Нельзя лишить себя прав'
     ];

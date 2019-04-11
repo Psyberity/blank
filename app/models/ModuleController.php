@@ -8,7 +8,6 @@ class ModuleController extends Base
 	public $name;
 	public $controller_name;
 
-    public static $primaryKey = 'module_controller_id';
     public static $dataTablesColumns = [
         ['name' => ['name']],
         ['controller_name' => ['controller_name']],
@@ -21,6 +20,7 @@ class ModuleController extends Base
         'edit' => 'Редактировать контроллер',
         'created' => 'Контроллер добавлен',
         'edited' => 'Контроллер изменен',
+        'deleted' => 'Контроллер удален',
         'not_found' => 'Контроллер не найден'
     ];
 
@@ -41,7 +41,7 @@ class ModuleController extends Base
         ]);
     }
 
-    public function beforeDelete()
+    public function beforeDelete():bool
     {
         // TODO: проверять использование контроллера в ACL
         $controllerActions = $this->controller_actions;
@@ -55,19 +55,20 @@ class ModuleController extends Base
                 }
             }
         }
+        return parent::beforeDelete();
     }
 
     public static function simpleModuleArray(int $moduleId, string $zeroValue = null):array
     {
         $lines = self::findByModuleId($moduleId)->toArray();
-        return self::simpleDataArray(['name'], $lines, $zeroValue);
+        return self::simpleDataArray('module_controller_id', ['name'], $lines, $zeroValue);
     }
 
     public static function selectOptions(string $fieldName, array $params = []):array
     {
         switch ($fieldName) {
             case 'module_id':
-                $options = Module::simpleDataArray();
+                $options = Module::simpleDataArray('module_id');
                 break;
             default:
                 $options = [];

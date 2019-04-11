@@ -3,11 +3,12 @@ namespace Modules\Admin\Controllers;
 
 use App\Models\ModuleUser;
 use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\Select2Field;
+use Modules\Admin\Forms\Fields\SelectField;
 
 class ModuleUserController extends ModelControllerBase
 {
-    protected $model = ModuleUser::class;
-
     protected $assetsChange = [
         'create' => [
             'js' => ['module_user_create' => true]
@@ -19,11 +20,12 @@ class ModuleUserController extends ModelControllerBase
 
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(ModuleUser::class, 'module_user_id')
+            ->registerField(new IdField('module_user_id', 'ID', []))
+            ->registerField(new Select2Field('user_id', 'Пользователь'))
+            ->registerField(new SelectField('module_role_id', 'Роль', [], [$this->model]));
 
-        $this->registerField(FieldBase::TYPE_ID, 'module_user_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_SELECT2, 'user_id', 'Пользователь')
-            ->registerField(FieldBase::TYPE_SELECT, 'module_role_id', 'Роль', []);
+        parent::initialize();
     }
 
     protected function setEditVars():void

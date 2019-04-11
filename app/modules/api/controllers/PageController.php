@@ -5,7 +5,12 @@ use App\Models\Page;
 
 class PageController extends ControllerBase
 {
-    protected $model = Page::class;
+    public function initialize()
+    {
+        $this->registerModel(Page::class, 'page_id');
+
+        parent::initialize();
+    }
 
     public function listAction():bool
     {

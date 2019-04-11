@@ -2,23 +2,27 @@
 namespace Modules\Admin\Controllers;
 
 use App\Models\User;
+use Modules\Admin\Forms\Fields\CheckboxField;
+use Modules\Admin\Forms\Fields\ConfirmPasswordField;
 use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\ImageField;
+use Modules\Admin\Forms\Fields\TextField;
 
 class UserController extends ModelControllerBase
 {
-    protected $model = User::class;
-
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(User::class, 'user_id')
+            ->registerField(new IdField('user_id', 'ID', []))
+            ->registerField(new TextField('name', 'ФИО'))
+            ->registerField(new TextField('email', 'E-mail'))
+            ->registerField(new TextField('phone', 'Телефон', []))
+            ->registerField(new ConfirmPasswordField('password', 'Пароль', []))
+            ->registerField(new ImageField('avatar', 'Аватар', []))
+            ->registerField(new CheckboxField('active', 'Активность', []));
 
-        $this->registerField(FieldBase::TYPE_ID, 'user_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_TEXT, 'name', 'ФИО')
-            ->registerField(FieldBase::TYPE_TEXT, 'email', 'E-mail')
-            ->registerField(FieldBase::TYPE_TEXT, 'phone', 'Телефон', [])
-            ->registerField(FieldBase::TYPE_CONFIRM_PASSWORD, 'password', 'Пароль', [])
-            ->registerField(FieldBase::TYPE_IMAGE, 'avatar', 'Аватар', [])
-            ->registerField(FieldBase::TYPE_CHECKBOX, 'active', 'Активность', []);
+        parent::initialize();
     }
 
     protected function afterCreate():bool

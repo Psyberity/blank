@@ -5,7 +5,12 @@ use App\Models\Module;
 
 class ModuleController extends ControllerBase
 {
-    protected $model = Module::class;
+    public function initialize()
+    {
+        $this->registerModel(Module::class, 'module_id');
+
+        parent::initialize();
+    }
 
     public function listAction():bool
     {

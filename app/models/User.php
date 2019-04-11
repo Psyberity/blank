@@ -13,7 +13,6 @@ class User extends Base
     public $last_login;
     public $token;
 
-    public static $primaryKey = 'user_id';
     public static $dataTablesColumns = [
         ['name' => ['name']],
         ['email' => ['email']],
@@ -28,6 +27,7 @@ class User extends Base
         'edit' => 'Редактировать пользователя',
         'created' => 'Пользователь добавлен',
         'edited' => 'Пользователь изменен',
+        'deleted' => 'Пользователь удален',
         'not_found' => 'Пользователь не найден'
     ];
 

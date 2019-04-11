@@ -1,26 +1,20 @@
 <?php
 namespace Modules\Admin\Controllers;
 
+use App\Classes\ExtensionException;
+use App\Classes\FileUpload;
+use App\Classes\UnlinkException;
+use App\Traits\AdminControllerTrait;
+use App\Traits\ControllerTrait;
 use App\Models\Base;
-use Modules\Admin\Forms\Fields\CheckboxField;
-use Modules\Admin\Forms\Fields\ConfirmPasswordField;
 use Modules\Admin\Forms\Fields\FieldBase;
-use Modules\Admin\Forms\Fields\FileField;
-use Modules\Admin\Forms\Fields\HiddenField;
-use Modules\Admin\Forms\Fields\IdField;
-use Modules\Admin\Forms\Fields\ImageField;
-use Modules\Admin\Forms\Fields\NumberField;
-use Modules\Admin\Forms\Fields\PasswordField;
-use Modules\Admin\Forms\Fields\Select2Field;
-use Modules\Admin\Forms\Fields\SelectField;
-use Modules\Admin\Forms\Fields\TextareaField;
-use Modules\Admin\Forms\Fields\TextField;
-use Modules\Admin\Forms\Fields\WysiwygField;
 use Phalcon\Forms\Form;
-use Phalcon\Mvc\Controller as PhalconController;
+use Phalcon\Mvc\Controller;
 
-class ModelControllerBase extends ControllerBase
+class ModelControllerBase extends Controller
 {
+    use ControllerTrait, AdminControllerTrait;
+
     public $module;
     public $controller;
     public $action;
@@ -28,6 +22,7 @@ class ModelControllerBase extends ControllerBase
     public $acl;
     public $auth;
     public $lang;
+    public $apiUrl;
 
     protected $model;
     protected $labels;
@@ -35,6 +30,8 @@ class ModelControllerBase extends ControllerBase
     protected $fields;
     protected $item;
     protected $primaryKey;
+    protected $assetsChange;
+    protected $moduleName = 'admin';
 
     public function initialize()
     {
@@ -43,10 +40,9 @@ class ModelControllerBase extends ControllerBase
             $this->response->redirect('');
             return false;
         }
-        parent::initialize();
+        $this->setAssets($this->action->action_name);
         $modelClass = $this->model;
         $this->labels = $modelClass::$labels;
-        $this->primaryKey = $modelClass::$primaryKey;
         $this->fileFields = $modelClass::$fileFields;
     }
 
@@ -85,20 +81,28 @@ class ModelControllerBase extends ControllerBase
 
     protected function uploadFiles():void
     {
-        $files = $this->request->getUploadedFiles(true);
-        if (!empty($files)) {
-            foreach ($files as $file) {
-                $key = $file->getKey();
-                $extension = $file->getExtension();
-                if (empty($extension)) continue;
-                if (!in_array($key, $this->fileFields)) continue;
+        if (!empty($this->fileFields)) {
+            foreach ($this->fileFields as $fileField) {
+                $filename = $this->item->getVal([$this->primaryKey]) . $fileField;
                 $uploadDir = $this->item->checkUploadDir($this->module->getDir('module_upload'));
-                $pk = $this->primaryKey;
-                $uploadFile = $this->item->$pk . $key . '.' . $extension;
-                $uploadPath = $_SERVER['DOCUMENT_ROOT'] . $uploadDir . '/' . $uploadFile;
-                $file->moveTo($uploadPath);
-                $this->item->$key = $uploadDir . '/' . $uploadFile;
-                $this->item->update();
+                $fileUpload = new FileUpload($fileField, $filename, $_SERVER['DOCUMENT_ROOT'] . $uploadDir);
+                try {
+                    if ($fileUpload->upload($this->request)) {
+                        $this->item->$fileField = $uploadDir . '/' . $fileUpload->getUploadedName();
+                        $this->item->update();
+                    }
+                } catch (ExtensionException $exception) {
+                    $this->flashSession->error($exception->getMessage());
+                }
+                $deleteFile = $this->request->getPost($fileField . '-delete');
+                if (!empty($deleteFile)) {
+                    try {
+                        $this->item->deleteFile($fileField);
+                        $this->flashSession->success('Файл "' . $this->fields[$fileField]->getLabel() . '" удален');
+                    } catch (UnlinkException $exception) {
+                        $this->flashSession->error($exception->getMessage());
+                    }
+                }
             }
         }
     }
@@ -177,8 +181,7 @@ class ModelControllerBase extends ControllerBase
 
     protected function setEditVars():void
     {
-        $primaryKey = $this->primaryKey;
-        $this->view->setVar('item_id', $this->item->$primaryKey);
+        $this->view->setVar('item_id', $this->item->getVal([$this->primaryKey]));
         $this->view->setVar('item', $this->item);
         $this->view->setVar('h2', $this->labels['edit']);
         $this->view->setVar('submit_label', 'Сохранить');
@@ -189,8 +192,7 @@ class ModelControllerBase extends ControllerBase
 
     protected function setViewVars():void
     {
-        $primaryKey = $this->primaryKey;
-        $this->view->setVar('item_id', $this->item->$primaryKey);
+        $this->view->setVar('item_id', $this->item->getVal([$this->primaryKey]));
         $this->view->setVar('item', $this->item);
         $this->view->setVar('h2', $this->labels['edit']);
         $this->view->setVar('render_action', 'view');
@@ -252,11 +254,14 @@ class ModelControllerBase extends ControllerBase
         $modelClass = $this->model;
         $this->item = $modelClass::findFirst($itemId);
         if ($this->item) {
-            if (!$this->item->delete()) {
-                $this->flashErrors();
-            } else {
-                // TODO: перенести в labels
-                $this->flashSession->success('Запись успешно удалена');
+            try {
+                if (!$this->item->delete()) {
+                    $this->flashErrors();
+                } else {
+                    $this->flashSession->success($this->labels['deleted']);
+                }
+            } catch (UnlinkException $exception) {
+                $this->flashSession->error($exception->getMessage());
             }
         } else {
             $this->flashSession->error($this->labels['not_found']);
@@ -292,56 +297,21 @@ class ModelControllerBase extends ControllerBase
     protected function flashErrors(Base $object = null):void
     {
         if ($object === null) $object = $this->item;
-        parent::flashErrors($object);
+        foreach ($object->getMessages() as $message) {
+            $this->flashSession->error($message->getMessage());
+        }
     }
 
-    public function registerField(int $fieldType, string $name, string $label = '', array $validators = [FieldBase::VALID_PRESENCE]):ControllerBase
+    public function registerField(FieldBase $fieldObject):ModelControllerBase
     {
-        switch ($fieldType) {
-            case FieldBase::TYPE_TEXT:
-                $field = new TextField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_SELECT:
-                $field = new SelectField($name, $label, $validators, $this->model);
-                break;
-            case FieldBase::TYPE_HIDDEN:
-                $field = new HiddenField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_SELECT2:
-                $field = new Select2Field($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_PASSWORD:
-                $field = new PasswordField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_CONFIRM_PASSWORD:
-                $field = new ConfirmPasswordField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_NUMBER:
-                $field = new NumberField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_TEXTAREA:
-                $field = new TextareaField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_WYSIWYG:
-                $field = new WysiwygField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_FILE:
-                $field = new FileField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_IMAGE:
-                $field = new ImageField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_CHECKBOX:
-                $field = new CheckboxField($name, $label, $validators);
-                break;
-            case FieldBase::TYPE_ID:
-                $field = new IdField($name, $label, $validators);
-                break;
-            default:
-                $field = null;
-                break;
-        }
-        $this->fields[$name] = $field;
+        $this->fields[$fieldObject->getName()] = $fieldObject;
+        return $this;
+    }
+
+    public function registerModel(string $modelClass, string $primaryKey):ModelControllerBase
+    {
+        $this->model = $modelClass;
+        $this->primaryKey = $primaryKey;
         return $this;
     }
 }

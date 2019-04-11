@@ -3,18 +3,19 @@ namespace Modules\Admin\Controllers;
 
 use App\Models\Module;
 use Modules\Admin\Forms\Fields\FieldBase;
+use Modules\Admin\Forms\Fields\IdField;
+use Modules\Admin\Forms\Fields\TextField;
 
 class ModuleController extends ModelControllerBase
 {
-    protected $model = Module::class;
-
     public function initialize()
     {
-        parent::initialize();
+        $this->registerModel(Module::class, 'module_id')
+            ->registerField(new IdField('module_id', 'ID', []))
+            ->registerField(new TextField('name', 'Название'))
+            ->registerField(new TextField('module_name', 'Имя модуля'));
 
-        $this->registerField(FieldBase::TYPE_ID, 'module_id', 'ID', [])
-            ->registerField(FieldBase::TYPE_TEXT, 'name', 'Название')
-            ->registerField(FieldBase::TYPE_TEXT, 'module_name', 'Имя модуля');
+        parent::initialize();
     }
 
     public function editAction(int $itemId):bool

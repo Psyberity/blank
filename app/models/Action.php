@@ -9,7 +9,6 @@ class Action extends Base
 	public $name;
 	public $action_name;
 
-    public static $primaryKey = 'action_id';
     public static $dataTablesColumns = [
         ['name' => ['name']],
         ['action_name' => ['action_name']]
@@ -21,6 +20,7 @@ class Action extends Base
         'edit' => 'Редактировать экшен',
         'created' => 'Экшен добавлен',
         'edited' => 'Экшен изменен',
+        'deleted' => 'Экшен удален',
         'not_found' => 'Экшен не найден'
     ];
 
@@ -40,6 +40,6 @@ class Action extends Base
             $this->appendMessage($message);
             return false;
         }
-        return true;
+        return parent::beforeDelete();
     }
 }

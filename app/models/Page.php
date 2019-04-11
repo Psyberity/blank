@@ -8,7 +8,6 @@ class Page extends Base
 	public $name;
 	public $content;
 
-    public static $primaryKey = 'page_id';
     public static $dataTablesColumns = [
         ['name' => ['name']],
         ['page_name' => ['page_name']]
@@ -20,6 +19,7 @@ class Page extends Base
         'edit' => 'Редактировать страницу',
         'created' => 'Страница добавлена',
         'edited' => 'Страница изменена',
+        'deleted' => 'Страница удалена',
         'not_found' => 'Страница не найдена'
     ];
 }

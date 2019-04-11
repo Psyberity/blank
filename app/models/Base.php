@@ -1,17 +1,17 @@
 <?php
 namespace App\Models;
 
+use App\Classes\UnlinkException;
 use Phalcon\Mvc\Model;
 
 class Base extends Model
 {
-	public static $primaryKey;
     public static $dataTablesColumns;
     public static $searchFields;
     public static $fileFields;
     public static $labels;
 
-    public static function simpleDataArray(array $valueField = ['name'], array $lines = [], string $zeroValue = null):array
+    public static function simpleDataArray(string $keyField, array $valueField = ['name'], array $lines = [], string $zeroValue = null):array
     {
         $arr = [];
         if ($zeroValue) $arr[0] = $zeroValue;
@@ -19,7 +19,6 @@ class Base extends Model
             $params = (count($valueField) == 1) ? ['order' => $valueField[0]] : null;
             $lines = self::find($params)->toArray();
         }
-        $className = get_called_class();
         foreach ($lines as $line) {
             if (count($valueField) > 1) {
                 $val = [];
@@ -30,7 +29,7 @@ class Base extends Model
             } else {
                 $val = $line[$valueField[0]];
             }
-            $arr[$line[$className::$primaryKey]] = $val;
+            $arr[$line[$keyField]] = $val;
         }
         return $arr;
     }
@@ -90,6 +89,33 @@ class Base extends Model
     public static function selectOptions(string $fieldName, array $params = []):array
     {
         return [];
+    }
+
+    public function deleteFile(string $field):void
+    {
+        if (!empty($this->$field)) {
+            $fullPath = $_SERVER['DOCUMENT_ROOT'] . $this->$field;
+            if (!unlink($fullPath)) {
+                throw new UnlinkException('Cannot delete file: ' . $fullPath);
+            }
+            $this->$field = null;
+            $this->update();
+        }
+    }
+
+    public function deleteFiles():void
+    {
+        if (!empty(static::$fileFields)) {
+            foreach (static::$fileFields as $fileField) {
+                $this->deleteFile($fileField);
+            }
+        }
+    }
+
+    public function beforeDelete():bool
+    {
+        $this->deleteFiles();
+        return true;
     }
 
 }

@@ -7,7 +7,6 @@ class ModuleControllerAction extends Base
 	public $module_controller_id;
 	public $action_id;
 
-    public static $primaryKey = 'module_controller_action_id';
     public static $dataTablesColumns = [];
     public static $searchFields = [];
     public static $labels = [
@@ -16,6 +15,7 @@ class ModuleControllerAction extends Base
         'edit' => 'Редактировать экшен контроллера',
         'created' => 'Экшен контроллера добавлен',
         'edited' => 'Экшен контроллера изменен',
+        'deleted' => 'Экшен контроллера удален',
         'not_found' => 'Экшен контроллера не найден'
     ];
 

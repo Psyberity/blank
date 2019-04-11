@@ -8,7 +8,6 @@ class ModuleRole extends Base
 	public $name;
 	public $acl;
 
-    public static $primaryKey = 'module_role_id';
     public static $dataTablesColumns = [
         ['name' => ['name']],
         ['module_id' => ['module', 'name']]
@@ -20,6 +19,7 @@ class ModuleRole extends Base
         'edit' => 'Редактировать роль',
         'created' => 'Роль создана',
         'edited' => 'Роль изменена',
+        'deleted' => 'Роль удалена',
         'not_found' => 'Роль не найдена',
         'delete_self' => 'Нельзя удалить свою роль'
     ];
@@ -41,14 +41,14 @@ class ModuleRole extends Base
             $tempLine['module'] = $moduleName;
             $lines[] = $tempLine;
         }
-        return self::simpleDataArray(['module', 'name'], $lines, $zeroValue);
+        return self::simpleDataArray('module_role_id', ['module', 'name'], $lines, $zeroValue);
     }
 
     public static function selectOptions(string $fieldName, array $params = []):array
     {
         switch ($fieldName) {
             case 'module_id':
-                $options = Module::simpleDataArray();
+                $options = Module::simpleDataArray('module_id');
                 break;
             default:
                 $options = [];

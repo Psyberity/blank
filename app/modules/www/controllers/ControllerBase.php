@@ -23,7 +23,6 @@ class ControllerBase extends PhalconController
     protected $labels;
     protected $form;
     protected $item;
-    protected $primaryKey;
     protected $assetsChange;
 
     public function beforeExecuteRoute()

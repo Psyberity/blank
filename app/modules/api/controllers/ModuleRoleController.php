@@ -5,7 +5,12 @@ use App\Models\ModuleRole;
 
 class ModuleRoleController extends ControllerBase
 {
-    protected $model = ModuleRole::class;
+    public function initialize()
+    {
+        $this->registerModel(ModuleRole::class, 'module_role_id');
+
+        parent::initialize();
+    }
 
     public function listAction():bool
     {
