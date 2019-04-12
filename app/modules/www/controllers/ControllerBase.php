@@ -125,7 +125,7 @@ class ControllerBase extends PhalconController
         }
     }
 
-    protected function flashErrors(Base $object = null):void
+    protected function flashErrors($object = null):void
     {
         if ($object === null) $object = $this->item;
         foreach ($object->getMessages() as $message) {

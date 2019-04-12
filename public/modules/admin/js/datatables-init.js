@@ -5,7 +5,7 @@ $(document).ready(function(){
         "processing": true,
         "serverSide": true,
         "ajax": {
-            "url": '/ajax/api/',
+            "url": '/ajax/api',
             "dataSrc": function(json) {
                 if(json.data == 'not_authorized') {
                     document.location.href = '/auth';

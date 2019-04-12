@@ -22,7 +22,7 @@ class ControllerBase extends Controller
     protected $assetsChange;
     protected $moduleName = 'admin';
 
-    protected function flashErrors(Base $object):void
+    protected function flashErrors($object):void
     {
         foreach ($object->getMessages() as $message) {
             $this->flashSession->error($message->getMessage());
