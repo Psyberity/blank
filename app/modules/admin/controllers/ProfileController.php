@@ -27,9 +27,9 @@ class ProfileController extends ModelControllerBase // TODO: перенести 
         return parent::editAction($this->auth->user->user_id);
     }
 
-    protected function editPost():bool
+    protected function editPost(array $params = []):bool
     {
-        return parent::editPost();
+        return parent::editPost($params);
     }
 
     protected function setEditVars():void

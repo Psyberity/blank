@@ -77,9 +77,9 @@ abstract class FieldBase
         return $this;
     }
 
-    public function getCompiledFields():array
+    public function getCompiledFields(array $params = []):array
     {
-        $this->compile()->appendValidators();
+        $this->compile(null, $params)->appendValidators();
         if (empty($this->field)) return [];
         return [$this->field];
     }
