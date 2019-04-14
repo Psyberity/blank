@@ -129,14 +129,14 @@ class ModuleControllerController extends ModelControllerBase
         return parent::deleteAction($itemId);
     }
 
-    protected function createPost():bool
+    protected function createPost(array $params = []):bool
     {
-        return parent::createPost();
+        return parent::createPost($params);
     }
 
-    protected function editPost():bool
+    protected function editPost(array $params = []):bool
     {
-        return parent::editPost();
+        return parent::editPost($params);
     }
 
     public function setCommonVars():void

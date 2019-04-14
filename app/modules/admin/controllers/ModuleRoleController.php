@@ -109,14 +109,14 @@ class ModuleRoleController extends ModelControllerBase
         return parent::editAction($itemId);
     }
 
-    protected function createPost():bool
+    protected function createPost(array $params = []):bool
     {
-        return parent::createPost();
+        return parent::createPost($params);
     }
 
-    protected function editPost():bool
+    protected function editPost(array $params = []):bool
     {
-        return parent::editPost();
+        return parent::editPost($params);
     }
 
     protected function setCreateVars():void

@@ -107,13 +107,13 @@ class ModelControllerBase extends Controller
         }
     }
 
-    protected function createPost():bool
+    protected function createPost(array $params = []):bool
     {
         if ($this->request->isPost()) {
 
             $form = new Form();
             foreach ($this->fields as $field) {
-                $formFields = $field->getCompiledFields();
+                $formFields = $field->getCompiledFields($params);
                 if (!empty($formFields)) {
                     foreach ($formFields as $formField) {
                         $form->add($formField);
@@ -139,13 +139,13 @@ class ModelControllerBase extends Controller
         return false;
     }
 
-    protected function editPost():bool
+    protected function editPost(array $params = []):bool
     {
         if ($this->request->isPost()) {
 
             $form = new Form();
             foreach ($this->fields as $field) {
-                $formFields = $field->getCompiledFields();
+                $formFields = $field->getCompiledFields($params);
                 if (!empty($formFields)) {
                     foreach ($formFields as $formField) {
                         $form->add($formField);

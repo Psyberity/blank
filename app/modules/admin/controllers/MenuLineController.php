@@ -41,14 +41,16 @@ class MenuLineController extends ModelControllerBase
         return parent::deleteAction($itemId);
     }
 
-    protected function createPost():bool
+    protected function createPost(array $params = []):bool
     {
-        return parent::createPost();
+        $params['module_id'] = $this->module->module_id;
+        return parent::createPost($params);
     }
 
-    protected function editPost():bool
+    protected function editPost(array $params = []):bool
     {
-        return parent::editPost();
+        $params['module_id'] = $this->module->module_id;
+        return parent::editPost($params);
     }
 
     protected function setCreateVars():void
