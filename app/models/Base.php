@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Classes\UnlinkException;
+use Phalcon\Di;
 use Phalcon\Mvc\Model;
 
 class Base extends Model
@@ -10,6 +11,20 @@ class Base extends Model
     public static $searchFields;
     public static $fileFields;
     public static $labels;
+    public static $dbSchema;
+
+    public function initialize()
+    {
+        $config = Di::getDefault()->get('config');
+        if ($config->db_adapter == 'Postgresql') {
+            if (!empty(static::$dbSchema)) {
+                $this->setSchema(static::$dbSchema);
+            } else {
+                $this->setSchema($config->db_schema);
+            }
+        }
+
+    }
 
     public static function simpleDataArray(string $keyField, array $valueField = ['name'], array $lines = [], string $zeroValue = null):array
     {

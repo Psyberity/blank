@@ -3,7 +3,6 @@ error_reporting(E_ALL);
 #error_reporting(0);
 
 use Phalcon\DI\FactoryDefault;
-use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
 
 $config = include __DIR__ . '/../app/config/config.php';
 
@@ -22,13 +21,17 @@ $di->set('router', function () use ($config) {
 }, true);
 
 $di->set('db', function () use ($config) {
-    return new DbAdapter([
-        'host' => $config->database->host,
-        'username' => $config->database->username,
-        'password' => $config->database->password,
-        'dbname' => $config->database->dbname,
-        'charset' => $config->database->charset
-    ]);
+
+    switch ($config->db_adapter) {
+        case 'Mysql':
+            return new Phalcon\Db\Adapter\Pdo\Mysql((array)$config->database);
+            break;
+        case 'Postgresql':
+            return new Phalcon\Db\Adapter\Pdo\Postgresql((array)$config->database);
+            break;
+        default:
+            throw new Exception('Unknown database adapter');
+    }
 });
 
 $application = new \Phalcon\Mvc\Application();
