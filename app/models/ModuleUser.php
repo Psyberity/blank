@@ -25,6 +25,8 @@ class ModuleUser extends Base
 
     public function initialize()
     {
+        parent::initialize();
+
         $this->hasOne('user_id', __NAMESPACE__ . '\User', 'user_id', [
             'alias' => 'user'
         ]);
