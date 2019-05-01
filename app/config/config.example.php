@@ -4,8 +4,15 @@ return new \Phalcon\Config([
     'module_default' => 'www',
     'module_api' => 'api',
     'langs' => ['ru', 'en', 'fr', 'de'],
+//    'db_adapter' => 'Postgresql',
+//    'database' => [
+//        'host'        => 'localhost',
+//        'username'    => 'postgres',
+//        'password'    => '',
+//        'dbname'      => 'blank',
+//    ],
+    'db_adapter' => 'Mysql',
     'database' => [
-        'adapter'     => 'Mysql',
         'host'        => 'localhost',
         'username'    => 'root',
         'password'    => '',
