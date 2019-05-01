@@ -26,6 +26,8 @@ class ModuleRole extends Base
 
     public function initialize()
     {
+        parent::initialize();
+
         $this->hasOne('module_id', __NAMESPACE__ . '\Module', 'module_id', [
             'alias' => 'module'
         ]);

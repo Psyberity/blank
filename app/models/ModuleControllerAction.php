@@ -21,6 +21,8 @@ class ModuleControllerAction extends Base
 
     public function initialize()
     {
+        parent::initialize();
+
         $this->hasOne('action_id', __NAMESPACE__ . '\Action', 'action_id', [
             'alias' => 'action'
         ]);
