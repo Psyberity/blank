@@ -5,6 +5,7 @@ return new \Phalcon\Config([
     'module_api' => 'api',
     'langs' => ['ru', 'en', 'fr', 'de'],
 //    'db_adapter' => 'Postgresql',
+//    'db_schema' => 'cms',
 //    'database' => [
 //        'host'        => 'localhost',
 //        'username'    => 'postgres',

@@ -26,6 +26,8 @@ class ModuleController extends Base
 
     public function initialize()
     {
+        parent::initialize();
+
         $this->hasManyToMany(
             'module_controller_id', __NAMESPACE__ . '\ModuleControllerAction', 'module_controller_id',
             'action_id', __NAMESPACE__ . '\Action', 'action_id',

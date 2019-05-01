@@ -31,6 +31,8 @@ class MenuLine extends Base
 
     public function initialize()
     {
+        parent::initialize();
+
         $this->hasOne('module_controller_id', __NAMESPACE__ . '\ModuleController', 'module_controller_id', [
             'alias' => 'controller'
         ]);
