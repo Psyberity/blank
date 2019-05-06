@@ -89,7 +89,7 @@ class ControllerBase extends Controller
 
         if (count($items) == 0) {
             $emptyArray = [];
-            for ($i = 0; $i < count($this->dataTablesColumns) + 2; $i++) {
+            for ($i = 0; $i < count($this->dataTablesColumns) + 4; $i++) {
                 $emptyArray[] = ($i == 1) ? 'Не найдено' : '';
             }
             $tableData['data'][] = $emptyArray;
