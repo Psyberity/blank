@@ -134,7 +134,11 @@ class ControllerBase extends Controller
         if ($search && strlen($search) > 0) {
             if (!empty($this->searchFields)) {
                 foreach ($this->searchFields as $searchField) {
-                    $conditions[] = $searchField . " LIKE '%" . $search . "%'";
+					if ($this->config->db_adapter == 'Postgresql') {
+                        $conditions[] = $searchField . " ILIKE '%" . $search . "%'";
+                    } else {
+                        $conditions[] = $searchField . " LIKE '%" . $search . "%'";
+                    }
                 }
             }
         }

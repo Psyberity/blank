@@ -35,17 +35,17 @@ class ModuleRoleController extends ModelControllerBase
 
         $acl = new Memory();
         $acl->setDefaultAction(Acl::DENY);
-        $acl->addRole(new PhalconRole($moduleRoleId));
+        $acl->addRole(new PhalconRole((string)$moduleRoleId));
         // TODO разобраться почему не работает setDefaultAction DENY
-        $acl->deny($moduleRoleId, '*', '*');
+        $acl->deny((string)$moduleRoleId, '*', '*');
         if ($moduleRoleId == 1 || $moduleRoleId == 5) {
-            $acl->allow($moduleRoleId, '*', '*');
+            $acl->allow((string)$moduleRoleId, '*', '*');
         } else if ($moduleRoleId == 2) {
             foreach ($anonymousAccess as $controllerName => $actionNames) {
                 $currentController = ModuleController::findFirst("module_id = " . $this->item->module_id . " AND controller_name = '" . $controllerName . "'");
                 foreach ($actionNames as $actionName) {
-                    $acl->addResource(new Resource($currentController->module_controller_id), [Action::getId($actionName)]);
-                    $acl->allow($moduleRoleId, $currentController->module_controller_id, [Action::getId($actionName)]);
+                    $acl->addResource(new Resource((string)$currentController->module_controller_id), [Action::getId($actionName)]);
+                    $acl->allow((string)$moduleRoleId, (string)$currentController->module_controller_id, [Action::getId($actionName)]);
                 }
             }
         } else {
@@ -53,10 +53,10 @@ class ModuleRoleController extends ModelControllerBase
             foreach ($controllers as $controller) {
                 $actionIds = [];
                 foreach ($controller->actions as $action) $actionIds[] = $action->action_id;
-                $acl->addResource(new Resource($controller->module_controller_id), $actionIds);
+                $acl->addResource(new Resource((string)$controller->module_controller_id), $actionIds);
             }
             foreach ($actions as $moduleControllerId => $actionIds) {
-                $acl->allow($moduleRoleId, $moduleControllerId, $actionIds);
+                $acl->allow((string)$moduleRoleId, (string)$moduleControllerId, $actionIds);
             }
         }
         return $acl;
